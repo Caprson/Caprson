@@ -1,0 +1,16 @@
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.container {
+    max-width: 100%;
+    padding: 0 var(--default-layout-horizontal-spacer);
+    margin-top: var(--default-layout-header-height);
+    display: flex;
+}
+
+.content {
+    flex: 1;
+}

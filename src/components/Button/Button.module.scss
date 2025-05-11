@@ -1,0 +1,121 @@
+.wrapper {
+    -webkit-box-align: baseline;
+    align-items: baseline;
+    box-sizing: border-box;
+    display: inline-flex;
+    font-size: inherit;
+    font-style: normal;
+    font-family: inherit;
+    font-weight: 500;
+    max-width: 100%;
+    position: relative;
+    text-align: center;
+    color: #344563;
+    cursor: pointer;
+    height: 2.28571em;
+    line-height: 2.28571em;
+    vertical-align: middle;
+    width: auto;
+    -webkit-box-pack: center;
+    justify-content: center;
+    background-color: transparent;
+
+    text-decoration: none;
+    white-space: nowrap;
+    padding: 0 4px;
+    outline: none;
+    border-radius: 4px;
+    font-size: 1.4rem;
+    font-weight: 500;
+    font-family: var(--font-family);
+    cursor: pointer;
+    background-color: var(--white);
+    border: 1px solid transparent;
+    user-select: none;
+
+    + .wrapper {
+        margin-left: 4px;
+    }
+
+    &.disable {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+}
+
+.icon + .title,
+.title + .icon {
+    margin-left: 4px;
+}
+
+.icon {
+    display: inline-block;
+    width: 24px;
+    text-align: center;
+}
+
+// Button types
+.rounded {
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 6%);
+    border-color: rgba(22, 24, 35, 0.12);
+    color: rgba(22, 24, 35, 0.9);
+
+    &:hover {
+        border-color: rgba(22, 24, 35, 0.2);
+        background-color: rgba(22, 24, 35, 0.03);
+    }
+}
+
+.primary {
+    color: var(--white);
+    border-color: (var(--primary));
+    background-color: var(--primary);
+
+    &:hover {
+        border-color: (var(--primary));
+        background: linear-gradient(0deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.06)), #fe2c55;
+    }
+}
+.grey {
+    color: var(--grey-1);
+    background-color: var(--white);
+    &:hover {
+        color: var(--grey-1);
+        background-color: rgba($color: #44546f, $alpha: 0.2);
+    }
+    &:target {
+        color: var(--blue-1);
+        background-color: rgba($color: var(--blue-1, #0c66e4), $alpha: 0.3);
+    }
+    &:active {
+        color: var(--blue-2);
+    }
+}
+
+.outline {
+    color: var(--primary);
+    border-color: currentColor;
+
+    &:hover {
+        border-color: currentColor;
+        background: rgba(254, 44, 85, 0.06);
+    }
+}
+
+.text {
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+// Button sizes
+.small {
+    min-width: 88px;
+    padding: 4px 16px;
+}
+
+.large {
+    padding: 14px 16px;
+    min-width: 148px;
+}

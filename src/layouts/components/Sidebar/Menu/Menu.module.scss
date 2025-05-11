@@ -1,0 +1,46 @@
+.menu-item {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    font-weight: 600;
+    padding: 4px;
+    border-radius: 4px;
+    color: var(--text-color);
+    transition: background-color ease-in-out 200ms;
+
+    &:hover {
+        background-color: rgba(22, 24, 35, 0.03);
+    }
+
+    &.active {
+        color: var(--blue-1);
+        background-color: rgba($color: #8fb8f6, $alpha: 0.2);
+        .icon {
+            display: none;
+        }
+
+        .active-icon {
+            display: flex;
+        }
+
+        &:hover {
+            background-color: rgba($color: #8fb8f6, $alpha: 0.4);
+        }
+
+        &:active {
+            background-color: rgba($color: #8fb8f6, $alpha: 0.5);
+        }
+    }
+}
+
+.icon {
+    display: flex;
+}
+
+.active-icon {
+    display: none;
+}
+
+.title {
+    margin-left: 10px;
+}
