@@ -31,31 +31,7 @@ function Sidebar() {
     }, []);
 
     return (
-        <aside class="flex flex-col w-96 border-r border-gray-200 px-4 py-6 text-2xl select-none">
-            <div class="flex items-center space-x-2 mb-6">
-                <button class="p-1 rounded hover:bg-gray-100">
-                    <svg
-                        class="w-5 h-5 text-gray-600"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        viewBox="0 0 24 24"
-                    >
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="14" y="14" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                </button>
-                <button class="p-1 rounded hover:bg-gray-100">
-                    <svg class="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12c0 4.41 2.87 8.15 6.84 9.5v-6.71H7.9v-2.79h1.94V9.41c0-1.92 1.17-2.98 2.95-2.98.85 0 1.74.15 1.74.15v1.92h-1c-.99 0-1.3.62-1.3 1.26v1.5h2.22l-.36 2.79h-1.86v6.71C19.13 20.15 22 16.41 22 12c0-5.52-4.48-10-10-10z" />
-                    </svg>
-                </button>
-                <span class="font-semibold text-gray-900 text-base">Jira</span>
-            </div>
+        <aside class="flex fixed x-col w-96 h-full border-r border-gray-200 px-4 py-6 text-2xl select-none">
 
             <nav class="flex flex-col space-y-3 text-gray-700">
                 <a href="#" class="flex items-center space-x-3 hover:text-blue-600">
@@ -285,7 +261,6 @@ function Sidebar() {
                     <span>Customize sidebar</span>
                 </a>
             </nav>
-            <div class="mt-auto pt-4 text-xs text-gray-400 select-text">Give feedback on the n...</div>
         </aside>
     );
 }

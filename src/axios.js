@@ -1,36 +1,59 @@
 import axios from 'axios';
 
 const instance = axios.create({
-    baseURL: 'http://localhost:5180/api',
+    baseURL: 'http://localhost:8080/',
     headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
     },
+    withCredentials: true, 
 });
 
-axios.interceptors.request.use(
-    function (config) {
-        // Làm gì đó trước khi request dược gửi đi
+// === Request Interceptor: Gửi accessToken ===
+instance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
         return config;
     },
-    function (error) {
-        // Làm gì đó với lỗi request
-        return Promise.reject(error);
-    },
+    (error) => Promise.reject(error)
 );
 
-// Thêm một bộ đón chặn response
-axios.interceptors.response.use(
-    function (response) {
-        // Bất kì mã trạng thái nào nằm trong tầm 2xx đều khiến hàm này được trigger
-        // Làm gì đó với dữ liệu response
-        return response;
-    },
-    function (error) {
-        // Bất kì mã trạng thái nào lọt ra ngoài tầm 2xx đều khiến hàm này được trigger\
-        // Làm gì đó với lỗi response
+// === Response Interceptor: Tự động refresh token nếu 401 ===
+instance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // Nếu lỗi 401 và chưa retry
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const res = await axios.post(
+                    'http://localhost:8080/users/auth/refresh',
+                    {},
+                    { withCredentials: true }
+                );
+
+                const newAccessToken = res.data.accessToken;
+                localStorage.setItem('accessToken', newAccessToken);
+
+                // Gắn accessToken mới vào header rồi gửi lại request
+                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                return instance(originalRequest);
+            } catch (refreshError) {
+                console.error('Refresh token failed:', refreshError);
+                localStorage.removeItem('accessToken');
+                window.location.href = '/login'; // hoặc điều hướng tuỳ app của bạn
+                return Promise.reject(refreshError);
+            }
+        }
+
         return Promise.reject(error);
-    },
+    }
 );
 
 export default instance;
