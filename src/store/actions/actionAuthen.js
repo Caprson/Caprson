@@ -5,3 +5,10 @@ export const checkLogin = (ischeck) =>{
         checklog: ischeck
     }
 }
+
+export const IsShowPopup = (bool) =>{
+    return {
+        type:actionType.GET_SHOWPOUP,
+        isShow: bool 
+    }
+}

@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 export default function CreateProject() {
-      const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const [project, setProject] = useState({
         name: '',
@@ -21,23 +21,19 @@ export default function CreateProject() {
 
     const handlleSubmit = (e) => {
         e.preventDefault();
-        if (project.length === 0) {
-            const FetApi = async () => {
-                await apis
-                    .createProject(project)
-                    .then((res) => {
-                        navigate('/');
-                        toast.success('Sign up successful!');
-                    })
-                    .catch((error) => {
-                        console.error('Registration error: ', error);
-                        toast.error('An error occurred during sign up. Please try again.');
-                    });
-            };
-            FetApi();
-        } else {
-            toast.error('Please fill in the required fields correctly.');
-        }
+        const FetApi = async () => {
+            await apis
+                .createProject(project)
+                .then((res) => {
+                    navigate('/projects');
+                    toast.success('Sign up successful!');
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        };
+        FetApi();
     };
     return (
         <div className="min-h-screen flex items-center justify-center px-6 py-12 relative overflow-x-auto">
@@ -59,7 +55,7 @@ export default function CreateProject() {
                         <input
                             id="project-name"
                             type="text"
-                            name='name'
+                            name="name"
                             onChange={handleChange}
                             placeholder="Try a team name, project goal, milestone..."
                             className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -164,7 +160,7 @@ export default function CreateProject() {
                                 <input
                                     id="date_start"
                                     type="date"
-                                    name='startDate'
+                                    name="startDate"
                                     onChange={handleChange}
                                     placeholder="22/3/2024"
                                     className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -177,7 +173,7 @@ export default function CreateProject() {
                                 <input
                                     id="date_end"
                                     type="date"
-                                    name='endDate'
+                                    name="endDate"
                                     onChange={handleChange}
                                     placeholder="20/12/2025"
                                     className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -192,7 +188,7 @@ export default function CreateProject() {
                                 id="project-name"
                                 type="number"
                                 min={0}
-                                name='statusId'
+                                name="statusId"
                                 onChange={handleChange}
                                 placeholder="Try a team name, project goal, milestone..."
                                 className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -200,12 +196,12 @@ export default function CreateProject() {
                         </div>
                         <div>
                             <label className="block text-xl font-semibold mb-1" htmlFor="project-name">
-                                Description 
+                                Description
                             </label>
                             <input
                                 id="project-name"
                                 type="text"
-
+                                name='description'
                                 onChange={handleChange}
                                 placeholder="Try a team name, project goal, milestone..."
                                 className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
@@ -218,11 +214,7 @@ export default function CreateProject() {
                             >
                                 Cancel
                             </button>
-                            <button
-                                type="submit"
-                                disabled
-                                className="px-4 py-2 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed"
-                            >
+                            <button type="submit" className="px-4 py-2 bg-blue-200 text-gray-400 rounded-md">
                                 Create project
                             </button>
                         </div>

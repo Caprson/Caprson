@@ -13,6 +13,7 @@ const instance = axios.create({
 instance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('accessToken');
+        console.log(token)
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
@@ -30,11 +31,12 @@ instance.interceptors.response.use(
         // Nếu lỗi 401 và chưa retry
         if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
-
+            const refreshTk =  localStorage.getItem('refreshToken');
+            const rfToken = {refreshToken: refreshTk}
             try {
                 const res = await axios.post(
                     'http://localhost:8080/users/auth/refresh',
-                    {},
+                    {data:rfToken},
                     { withCredentials: true }
                 );
 

@@ -63,9 +63,93 @@ export const createEpic = (datas,param) =>
         try {
             const response = await axios({
                 url: `projects/epic/${param}/project`,
-                method: 'get',
+                method: 'post',
                 data:datas,
                 withCredentials: true,
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const createUserStore = (data) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: "projects/stories",
+                method: 'post',
+                data:data,
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+export const getUserStore = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: "projects/stories/project",
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const editUserStore = (id,datas) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/stories/${id}`,
+                method: 'put',
+                withCredentials: true,
+                data:datas,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const createSprint = (datas) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/sprint`,
+                method: 'post',
+                withCredentials: true,
+                data:datas,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getSprintByProject = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/sprint`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
             });
             resolve(response);
         } catch (error) {

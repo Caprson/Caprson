@@ -1,44 +1,56 @@
 import images from '~/assets/images';
 import * as apis from '~/apis/index';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
 function Projects() {
     const navigate = useNavigate();
 
-    const [project, setProject] = useState({
-        name: '',
-        description: '',
-        startDate: '',
-        endDate: '',
-        statusId: 1,
-    });
+    const [project, setProject] = useState([]);
 
-    const handleChange = (e) => {
-        setProject({ ...project, [e.target.name]: e.target.value });
-    };
-
-    const handlleSubmit = (e) => {
-        e.preventDefault();
-        if (project.length === 0) {
+    useEffect(()=>{
             const FetApi = async () => {
                 await apis
-                    .createProject(project)
+                    .getProjectByUserId()
                     .then((res) => {
-                        navigate('/');
+                        setProject(res.data.data);
+                        console.log(res.data.data);
                         toast.success('Sign up successful!');
                     })
                     .catch((error) => {
-                        console.error('Registration error: ', error);
+                        console.log( error);
                         toast.error('An error occurred during sign up. Please try again.');
                     });
             };
             FetApi();
-        } else {
-            toast.error('Please fill in the required fields correctly.');
+    },[])
+    
+     const GetUserById = (id) =>{
+        var username = '' ;
+        const FetApi = async () => {
+            await apis
+                .getUserById(id)
+                .then((res) => {
+                    username = res.data.data.userName
+                    toast.success('Sign up successful!');
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        };
+        FetApi();
+        return(username);
+    }
+
+    const SelectProject = (proId) =>{
+        navigate("/blacklog")
+        if(proId!==null){
+            console.log(proId)
+            localStorage.setItem("projectId", proId)
         }
-    };
+    }
     return (
         <body class="bg-white text-gray-800 font-sans p-6">
             <div class="max-w-6xl mx-auto">
@@ -109,7 +121,8 @@ function Projects() {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-white">
-                            <tr>
+                            {project.map((pj)=>(
+                                                            <tr>
                                 <td class="w-12 px-3 py-2 text-left text-gray-400">
                                     <i class="far fa-star"></i>
                                 </td>
@@ -121,12 +134,12 @@ function Projects() {
                                         src="https://storage.googleapis.com/a1aa/image/dca10588-fd8a-41bc-5676-15692ec2b9d6.jpg"
                                         width="20"
                                     />
-                                    <a class="text-blue-600 hover:underline text-sm font-normal" href="#">
-                                        Core Work Wave
+                                    <a class="text-blue-600 hover:underline text-sm cursor-pointer font-normal" onClick={()=>SelectProject(pj?.projectId)}>
+                                        {pj.name}
                                     </a>
                                 </td>
                                 <td class="px-3 py-2 text-gray-900 font-normal">CWW</td>
-                                <td class="px-3 py-2 text-gray-900 font-normal">Company-managed software</td>
+                                <td class="px-3 py-2 text-gray-900 font-normal">{pj?.createdAt}</td>
                                 <td class="px-3 py-2 flex items-center space-x-2 text-gray-900 font-normal">
                                     <div
                                         aria-label="LD"
@@ -134,11 +147,12 @@ function Projects() {
                                     >
                                         LD
                                     </div>
-                                    <span>Lê Chung Dũng</span>
+                                    <span>{pj?.createdBy}</span>
                                 </td>
                                 <td class="w-20 px-3 py-2 text-center text-gray-400 cursor-pointer select-none">•••</td>
                             </tr>
-                            <tr>
+                            ))}
+                            {/* <tr>
                                 <td class="w-12 px-3 py-2 text-left text-gray-400">
                                     <i class="far fa-star"></i>
                                 </td>
@@ -166,7 +180,7 @@ function Projects() {
                                     <span>Lê Chung Dũng</span>
                                 </td>
                                 <td class="w-20 px-3 py-2 text-center text-gray-400 cursor-pointer select-none">•••</td>
-                            </tr>
+                            </tr> */}
                         </tbody>
                     </table>
                 </div>

@@ -18,7 +18,7 @@ export const getUserById = (param) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: `users/user/${param}`,
+                url: `/users/${param}`,
                 method: 'get',
                 withCredentials: true,
             });
@@ -28,11 +28,11 @@ export const getUserById = (param) =>
         }
     });
 
-export const getProjectByUserId = (param) =>
+export const getProjectByUserId = () =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: `users/user/project/${param}`,
+                url: `users/projects`,
                 method: 'get',
                 withCredentials: true,
             });

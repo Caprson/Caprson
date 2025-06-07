@@ -2,6 +2,7 @@ import actionType from '../actions/actionType';
 
 const initState = {
     check_login: false,
+    isShowPopup: false
 };
 
 const appReducer = (state = initState, action) => {
@@ -10,6 +11,11 @@ const appReducer = (state = initState, action) => {
             return {
                 ...state,
                 check_login: action.check_login,
+            };
+        case actionType.GET_SHOWPOUP:
+            return {
+                ...state,
+                isShowPopup: action.isShow,
             };
 
         default:

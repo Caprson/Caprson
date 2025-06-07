@@ -55,11 +55,12 @@ function Login() {
                 await apis
                     .login(formData)
                     .then((res) => {
+                        console.log(res)
                         if (res.status === 200) {
                             toast.success('login success');
-
-                            window.localStorage.setItem('token', res.data.accessToken);
-                            window.localStorage.setItem('refreshToken', res.data.refreshToken);
+                            
+                            localStorage.setItem('accessToken', res.data.data.accessToken);
+                            localStorage.setItem('refreshToken', res.data.data.refreshToken);
                             dispatch(actions.checkLogin(true));
                             navigate('/');
                         }
