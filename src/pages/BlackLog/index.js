@@ -134,7 +134,7 @@ function BlackLog() {
 
     const [userStoreEdit, setUserStoreEdit] = useState({
         epicId: null,
-        sprintId: 1,
+        sprintId: 0,
         name: '',
         description: '',
         priorityId: 1,
@@ -205,8 +205,9 @@ function BlackLog() {
 
             sprints.forEach((sprint) => {
                 const sprintItems = items.filter((item) => item.sprintId === sprint.sprintId);
-                console.log(sprintItems);
-                newColumns[sprint.name] = sprintItems;
+                if (sprint.name && Array.isArray(sprintItems)) {
+                    newColumns[sprint.name] = sprintItems.filter(Boolean); // loại null/undefined
+                }
             });
 
             setColumns(newColumns);
@@ -219,7 +220,7 @@ function BlackLog() {
     const UpdateUserStore = async (id) => {
         try {
             await apis
-                .editUserStore(id, userStore)
+                .editUserStore(id, userStoreEdit)
                 .then((res) => {
                     GetAllData();
                 })
@@ -260,26 +261,55 @@ function BlackLog() {
     }, [isCreating]);
 
     const handleDragEnd = ({ active, over }) => {
-        if (!over) return;
+        if (!over || !active?.id) return;
 
-        const from = Object.keys(columns).find(
-            (key) => Array.isArray(columns[key]) && columns[key].some((item) => String(item?.storyId) === active.id),
-        );
-        const to = over.id;
+        const activeId = String(active.id);
+        const overId = String(over.id);
+        let from = null;
 
-        // Nếu không tìm được cột hợp lệ, dừng
-        if (!from || !to || from === to || !Array.isArray(columns[to])) return;
+        for (const key of Object.keys(columns)) {
+            const col = columns[key];
+            if (Array.isArray(col)) {
+                const found = col.find((i) => String(i?.storyId) === activeId);
+                if (found) {
+                    from = key;
+                    break;
+                }
+            }
+        }
 
-        const item = columns[from].find((i) => String(i?.storyId) === active.id);
+        if (!from || !columns[from] || !columns[overId] || from === overId) return;
+
+        const item = columns[from].find((i) => String(i?.storyId) === activeId);
         if (!item) return;
-        console.log(columns[from].filter((i) => String(i?.storyId) !== active.id));
+
+        // Tạo dữ liệu cần gửi cho update
+        const isMovingToBacklog = overId === 'backlog';
+        const targetSprint = itemsSprint.find((s) => s.name === overId);
+
+        const updateData = {
+            epicId: item.epicId,
+            sprintId: isMovingToBacklog ? null : targetSprint?.sprintId,
+            name: item.name,
+            description: item.description,
+            priorityId: item.priorityId,
+            assignedTo: item.assignedTo,
+            statusId: item.statusId,
+        };
+
+        apis.editUserStore(item.storyId, updateData)
+            .then(() => GetAllData())
+            .catch((err) => {
+                console.error(err);
+                toast.error('Failed to update sprint');
+            });
+
         setColumns({
             ...columns,
-            [from]: columns[from].filter((i) => String(i?.storyId) !== active.id),
-            [to]: [...columns[to], item],
+            [from]: columns[from].filter((i) => String(i?.storyId) !== activeId),
+            [overId]: [...columns[overId], item],
         });
     };
-
     console.log(columns);
     return (
         <div className="h-full p-4 space-y-6">
@@ -297,27 +327,23 @@ function BlackLog() {
                         {/* Dynamic Sprint Columns */}
                         {Object.keys(columns)
                             .filter((key) => key !== 'backlog' && Array.isArray(columns[key]))
-                            .map(
-                                (key) => (
-                                    (
-                                        <SprintColumn
-                                            key={key}
-                                            id={key}
-                                            title={key}
-                                            timeRange="..."
-                                            items={columns[key]}
-                                            renderTask={(item, idx) => (
-                                                <DraggableTask
-                                                    key={item?.storyId}
-                                                    id={String(item?.storyId)}
-                                                    index={idx}
-                                                    name={item?.name}
-                                                />
-                                            )}
+                            .map((key) => (
+                                <SprintColumn
+                                    key={key}
+                                    id={key}
+                                    title={key}
+                                    timeRange="..."
+                                    items={columns[key]}
+                                    renderTask={(item, idx) => (
+                                        <DraggableTask
+                                            key={item?.storyId}
+                                            id={String(item?.storyId)}
+                                            index={idx}
+                                            name={item?.name}
                                         />
-                                    )
-                                ),
-                            )}
+                                    )}
+                                />
+                            ))}
 
                         {/* Backlog section */}
                         <div
@@ -356,14 +382,16 @@ function BlackLog() {
                             <DroppableColumn
                                 id="backlog"
                                 items={columns.backlog || []}
-                                renderTask={(item, idx) => (
-                                    <DraggableTask
-                                        key={item.storyId}
-                                        id={String(item.storyId)}
-                                        index={idx}
-                                        name={item.name}
-                                    />
-                                )}
+                                renderTask={(item, idx) =>
+                                    item ? (
+                                        <DraggableTask
+                                            key={String(item?.storyId)}
+                                            id={String(item?.storyId)}
+                                            index={idx}
+                                            name={item?.name}
+                                        />
+                                    ) : null
+                                }
                             />
 
                             {isCreating ? (
@@ -395,7 +423,7 @@ function BlackLog() {
             <DragOverlay>
                 {activeId ? (
                     <div className="px-4 py-3 bg-white rounded shadow-lg text-xl font-semibold">
-                        {columns.backlog.concat(columns.sprint1).find((i) => i.storyId === activeId)?.name}
+                        {items.find((i) => String(i.storyId) === String(activeId))?.name}
                     </div>
                 ) : null}
             </DragOverlay>
