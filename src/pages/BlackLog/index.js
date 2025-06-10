@@ -9,36 +9,206 @@ import PopupSprint from './PopupSprint';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
 
-function DraggableTask({ id, index, name }) {
-    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
+function DraggableTask({ id, index, name, item }) {
+    const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: String(id) });
+    const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
+    const [user, setUser] = useState([]);
+    const [userAssignee, setUserAssignee] = useState({});
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+    function handleClickOutside(event) {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setShowAssigneeSelect(false);
+        }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+    };
+}, []);
+const GetUserByProject = async () => {
+            try {
+                await apis
+                    .getUseByProject()
+                    .then((res) => {
+                        setUser(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+    useEffect(() => {
+         GetUserByProject();
+    }, []);
+
+    useEffect(() => {
+        if (item != undefined) {
+            getUser(item?.assignedTo);
+        }
+    }, [item]);
+
+    const getUser = (id) => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .getUseById(id)
+                    .then((res) => {
+                        setUserAssignee(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
 
     const style = {
         transform: transform ? `translate3d(${transform.x}px, ${transform.y}px, 0)` : undefined,
     };
 
+    const stopDrag = (e) => e.stopPropagation();
+
+    const handleUserSelect = (userId) => {
+        const PostData = async () => {
+            try {
+                const update = {
+                    epicId: item?.epicId,
+                    sprintId: item?.sprintId,
+                    name: item?.name,
+                    description: item?.description,
+                    priorityId: item?.priorityId,
+                    assignedTo: userId,
+                    statusId: 1,
+                };
+
+                await apis
+                    .editUserStore(item?.storyId, update)
+                    .then((res) => {
+                        getUser(update?.assignedTo);
+                        GetUserByProject();
+                        setShowAssigneeSelect(false);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowAssigneeSelect(false);
+    };
+
+function getInitials(name = '') {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    if (words.length === 1) return words[0][0].toUpperCase();
+    return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+}
+
+function getInitialsElements(name = '') {
+    return getInitials(name); // chỉ return chuỗi, không cần tạo nhiều `div` con nữa
+}
+function getColorFromName(name = '') {
+    const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
+    const index = name ? name.charCodeAt(0) % colors.length : 0;
+    return colors[index];
+}
     return (
         <div
             ref={setNodeRef}
-            {...listeners}
             {...attributes}
             style={style}
-            className="flex items-center justify-between px-4 py-3 bg-white rounded shadow-sm cursor-move select-none mb-2"
+            className="flex items-center relative justify-between px-4 py-3 bg-white rounded shadow cursor-move select-none mb-2"
         >
+            <div {...listeners} className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "></div>
             <div className="flex items-center space-x-3">
-                <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded" />
+                <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded" onClick={stopDrag} />
                 <span className="text-xl text-gray-900">
                     <span className="font-semibold">NHOM4-{index + 1}</span> {name}
                 </span>
             </div>
-            <div className="flex items-center space-x-4">
-                <button className="bg-gray-300 text-gray-700 text-lg font-semibold rounded px-2 py-1">
-                    TO DO <i className="fas fa-caret-down ml-1"></i>
+            <div className="flex items-center space-x-3">
+                <button onClick={stopDrag} className="bg-gray-300 text-gray-700 text-sm rounded px-2 py-1">
+                    TO DO
                 </button>
-                <button className="text-gray-500 text-xl font-semibold px-3 py-1">-</button>
-                <button className="text-orange-600 text-lg font-semibold leading-none">=</button>
-                <button className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
-                    <i className="fas fa-user text-gray-600"></i>
+                <button onClick={stopDrag} className="text-gray-500 text-xl px-2">
+                    -
                 </button>
+                <button onClick={stopDrag} className="text-orange-600 text-xl px-2">
+                    =
+                </button>
+
+                {item != undefined && item.assignedTo ? (
+                    <div
+                    ref={dropdownRef}
+                        onClick={(e) => {
+                            stopDrag(e);
+                            setShowAssigneeSelect((prev) => !prev);
+                        }}
+                        title={`Assignee: ${userAssignee?.userName}`}
+                         className={`relative w-8 h-8 rounded-full ${getColorFromName(userAssignee?.userName)} hover:opacity-90 cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                    >
+                        {/* Avatar gồm nhiều chữ cái với màu riêng */}
+                        {getInitialsElements(userAssignee?.userName)}
+
+                        {showAssigneeSelect && (
+                            <ul className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                {user.map((data) => (
+                                    <li
+                                        key={data.userId}
+                                        onClick={() => handleUserSelect( data.userId)}
+                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            {getInitials(data.userName)}
+                                        </div>
+                                        <span className='text-gray-700'>{data.userName}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                ) : (
+                    <div
+                        onClick={(e) => {
+                            stopDrag(e);
+                            setShowAssigneeSelect((prev) => !prev);
+                        }}
+                        title="Click to assign user"
+                        className="relative w-8 h-8 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
+                    >
+                        <i className="fas fa-user"></i>
+
+                        {showAssigneeSelect && (
+                            <ul className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                {user.map((data) => (
+                                    <li
+                                        key={data.userId}
+                                        onClick={() => handleUserSelect( data.userId)}
+                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            {getInitials(data.userName)}
+                                        </div>
+                                        <span className='text-gray-700'>{data.userName}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
@@ -310,7 +480,7 @@ function BlackLog() {
             [overId]: [...columns[overId], item],
         });
     };
-    console.log(columns);
+
     return (
         <div className="h-full p-4 space-y-6">
             <Filters />
@@ -338,6 +508,7 @@ function BlackLog() {
                                         <DraggableTask
                                             key={item?.storyId}
                                             id={String(item?.storyId)}
+                                            item={item}
                                             index={idx}
                                             name={item?.name}
                                         />
@@ -387,6 +558,7 @@ function BlackLog() {
                                         <DraggableTask
                                             key={String(item?.storyId)}
                                             id={String(item?.storyId)}
+                                            item={item}
                                             index={idx}
                                             name={item?.name}
                                         />

@@ -62,7 +62,7 @@ function Login() {
                             localStorage.setItem('accessToken', res.data.data.accessToken);
                             localStorage.setItem('refreshToken', res.data.data.refreshToken);
                             dispatch(actions.checkLogin(true));
-                            navigate('/');
+                            navigate('/projects');
                         }
                     })
                     .catch((res) => {

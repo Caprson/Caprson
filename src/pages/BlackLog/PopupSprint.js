@@ -28,6 +28,7 @@ function PopupSprint({ setIsUpdate}) {
                             .then((res) => {
                                 console.log(res)
                                 setIsUpdate(true)
+                                dispatch(actions.IsShowPopup(false));
                             })
                             .catch((error) => {
                                 console.error('Registration error: ', error);

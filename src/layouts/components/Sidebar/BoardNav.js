@@ -1,4 +1,13 @@
+import { useState } from "react";
+import { useEffect,useRef } from "react";
+import { useSelector,useDispatch } from "react-redux";
+import Addpleople from "~/pages/Projects/Addpleople";
+import * as actions from "../../../store/actions"
+
 function BoardNav() {
+    const { isShowAddpeople } = useSelector((state) => state.app);
+    const dispatch = useDispatch();
+    
     return (
         <nav
         class="flex space-x-6 border-b border-gray-200 px-6 text-xl font-semibold text-gray-600 select-none overflow-x-auto"
@@ -181,8 +190,8 @@ function BoardNav() {
           </svg>
           <span>All work</span>
         </a>
-        <div class="flex items-center space-x-1 border-b-2 border-transparent text-gray-400 pb-3 cursor-default select-none">
-          <span>More</span>
+        <div   onClick={() => dispatch(actions.IsShowAddPeople(true))} class="flex items-center space-x-1 border-b-2 border-transparent text-gray-400 pb-3 cursor-default select-none">
+          <span>Add pleople</span>
           <span
             class="text-xs rounded bg-gray-200 px-1.5 py-0.5 font-semibold select-none"
             >6</span>
@@ -205,6 +214,7 @@ function BoardNav() {
             </svg>
           </button>
         </div>
+         {isShowAddpeople ? <Addpleople /> : <></>}
       </nav>
     );
 }

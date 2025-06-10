@@ -12,3 +12,9 @@ export const IsShowPopup = (bool) =>{
         isShow: bool 
     }
 }
+export const IsShowAddPeople = (bool) =>{
+    return {
+        type:actionType.GET_SHOWADDPEOPLE,
+        isShow: bool 
+    }
+}

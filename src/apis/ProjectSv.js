@@ -156,5 +156,56 @@ export const getSprintByProject = () =>
             reject(error);
         }
     });
+export const addPeopleProject = (datas) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `users/members`,
+                method: 'post',
+                data: datas,
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getUseByProject = () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `users/members`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getUseById = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `users/customer/${id}`,
+                method: 'get',
+                withCredentials: true,
+                
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+
+
+
 
     
