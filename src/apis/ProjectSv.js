@@ -203,6 +203,23 @@ export const getUseById = (id) =>
             reject(error);
         }
     });
+export const updateSprint = (id,datas) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/sprint/${id}`,
+                method: 'put',
+                withCredentials: true,
+                data:datas,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
 
 
 

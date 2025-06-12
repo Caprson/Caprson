@@ -8,6 +8,7 @@ import { DragOverlay } from '@dnd-kit/core';
 import PopupSprint from './PopupSprint';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
+import { useStore } from 'react-redux';
 
 function DraggableTask({ id, index, name, item }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: String(id) });
@@ -17,34 +18,34 @@ function DraggableTask({ id, index, name, item }) {
     const dropdownRef = useRef(null);
 
     useEffect(() => {
-    function handleClickOutside(event) {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-            setShowAssigneeSelect(false);
-        }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-    };
-}, []);
-const GetUserByProject = async () => {
-            try {
-                await apis
-                    .getUseByProject()
-                    .then((res) => {
-                        setUser(res.data.data);
-                    })
-                    .catch((error) => {
-                        console.error('Registration error: ', error);
-                        toast.error('An error occurred during sign up. Please try again.');
-                    });
-            } catch (error) {
-                toast.error('An error occurred during sign up. Please try again.');
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowAssigneeSelect(false);
             }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
         };
+    }, []);
+    const GetUserByProject = async () => {
+        try {
+            await apis
+                .getUseByProject()
+                .then((res) => {
+                    setUser(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
     useEffect(() => {
-         GetUserByProject();
+        GetUserByProject();
     }, []);
 
     useEffect(() => {
@@ -110,21 +111,21 @@ const GetUserByProject = async () => {
         setShowAssigneeSelect(false);
     };
 
-function getInitials(name = '') {
-    if (!name) return '';
-    const words = name.trim().split(' ');
-    if (words.length === 1) return words[0][0].toUpperCase();
-    return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
-}
+    function getInitials(name = '') {
+        if (!name) return '';
+        const words = name.trim().split(' ');
+        if (words.length === 1) return words[0][0].toUpperCase();
+        return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+    }
 
-function getInitialsElements(name = '') {
-    return getInitials(name); // chỉ return chuỗi, không cần tạo nhiều `div` con nữa
-}
-function getColorFromName(name = '') {
-    const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
-    const index = name ? name.charCodeAt(0) % colors.length : 0;
-    return colors[index];
-}
+    function getInitialsElements(name = '') {
+        return getInitials(name); // chỉ return chuỗi, không cần tạo nhiều `div` con nữa
+    }
+    function getColorFromName(name = '') {
+        const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
+        const index = name ? name.charCodeAt(0) % colors.length : 0;
+        return colors[index];
+    }
     return (
         <div
             ref={setNodeRef}
@@ -152,13 +153,15 @@ function getColorFromName(name = '') {
 
                 {item != undefined && item.assignedTo ? (
                     <div
-                    ref={dropdownRef}
+                        ref={dropdownRef}
                         onClick={(e) => {
                             stopDrag(e);
                             setShowAssigneeSelect((prev) => !prev);
                         }}
                         title={`Assignee: ${userAssignee?.userName}`}
-                         className={`relative w-8 h-8 rounded-full ${getColorFromName(userAssignee?.userName)} hover:opacity-90 cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                        className={`relative w-8 h-8 rounded-full ${getColorFromName(
+                            userAssignee?.userName,
+                        )} hover:opacity-90 cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
                     >
                         {/* Avatar gồm nhiều chữ cái với màu riêng */}
                         {getInitialsElements(userAssignee?.userName)}
@@ -168,13 +171,13 @@ function getColorFromName(name = '') {
                                 {user.map((data) => (
                                     <li
                                         key={data.userId}
-                                        onClick={() => handleUserSelect( data.userId)}
+                                        onClick={() => handleUserSelect(data.userId)}
                                         className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
                                     >
                                         <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
                                             {getInitials(data.userName)}
                                         </div>
-                                        <span className='text-gray-700'>{data.userName}</span>
+                                        <span className="text-gray-700">{data.userName}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -196,13 +199,13 @@ function getColorFromName(name = '') {
                                 {user.map((data) => (
                                     <li
                                         key={data.userId}
-                                        onClick={() => handleUserSelect( data.userId)}
+                                        onClick={() => handleUserSelect(data.userId)}
                                         className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
                                     >
                                         <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
                                             {getInitials(data.userName)}
                                         </div>
-                                        <span className='text-gray-700'>{data.userName}</span>
+                                        <span className="text-gray-700">{data.userName}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -231,31 +234,64 @@ function DroppableColumn({ id, items, renderTask }) {
     );
 }
 
-function SprintColumn({ id, title, timeRange, items, renderTask }) {
-    const { setNodeRef } = useDroppable({ id });
+function SprintColumn({ taskSprint, items, isUpda, renderTask }) {
+    const { setNodeRef } = useDroppable({ id: taskSprint.sprintId });
+    const StatusEnum = {
+        1: 'Start Sprint',
+        2: 'Completed',
+        3: 'Done',
+        4: 'Cancelled',
+    };
+    const handleClick = (newStatusId) => {
 
+        const PostData = async () => {
+            try {
+               
+                const updateSprint = {
+                    name: taskSprint?.name,
+                    startDate: taskSprint?.startDate,
+                    endDate: taskSprint?.endDate,
+                    statusId: newStatusId +1,
+                    goal: taskSprint?.goal,
+                };
+                console.log(updateSprint)
+                await apis
+                    .updateSprint(taskSprint?.sprintId, updateSprint)
+                    .then((res) => {isUpda(true)
+                        console.log(res)
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
     return (
         <div
             ref={setNodeRef}
-            aria-labelledby={`${id}-heading`}
+            aria-labelledby={`${taskSprint?.sprintId}-heading`}
             className="border border-gray-200 rounded-md p-4 space-y-3"
         >
             <div className="flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                     <input
                         type="checkbox"
-                        id={`${id}-checkbox`}
+                        id={`${taskSprint?.sprintId}-checkbox`}
                         className="w-5 h-5 text-blue-600 border-gray-300 rounded"
                     />
                     <button
                         aria-expanded="true"
-                        aria-controls={`${id}-items`}
+                        aria-controls={`${taskSprint?.sprintId}-items`}
                         className="flex items-center space-x-1 font-semibold text-gray-900 text-xl focus:outline-none"
                     >
                         <i className="fas fa-chevron-down text-gray-600"></i>
-                        <span id={`${id}-heading`}>{title}</span>
+                        <span id={`${taskSprint?.sprintId}-heading`}>{taskSprint?.name}</span>
                     </button>
-                    <span className="text-gray-500 text-xl">{timeRange}</span>
+                    <span className="text-gray-500 text-xl">{taskSprint?.startDate}</span>
                 </div>
                 <div className="flex items-center space-x-3">
                     <div className="ml-auto flex items-center space-x-1 text-lg font-semibold rounded-md px-1.5 py-0.5">
@@ -263,8 +299,11 @@ function SprintColumn({ id, title, timeRange, items, renderTask }) {
                         <span className="bg-blue-400 text-white rounded px-2 py-0.5">0</span>
                         <span className="bg-green-100 text-green-700 rounded px-2 py-0.5">0</span>
                     </div>
-                    <button className="border border-solid border-gray-300 rounded-md px-3 py-1 text-xl font-semibold hover:bg-gray-100">
-                        Complete sprint
+                    <button
+                        onClick={() => handleClick(taskSprint?.statusId)}
+                        className="border border-solid border-gray-300 rounded-md px-3 py-1 text-xl font-semibold hover:bg-gray-100"
+                    >
+                        {StatusEnum[taskSprint?.statusId]}
                     </button>
                     <button
                         aria-label="More options"
@@ -275,7 +314,10 @@ function SprintColumn({ id, title, timeRange, items, renderTask }) {
                 </div>
             </div>
 
-            <ul id={`${id}-items`} className="divide-y divide-gray-200 border border-gray-200 rounded-md">
+            <ul
+                id={`${taskSprint?.sprintId}-items`}
+                className="divide-y divide-gray-200 border border-gray-200 rounded-md"
+            >
                 {items.map(renderTask)}
             </ul>
         </div>
@@ -409,7 +451,8 @@ function BlackLog() {
 
     useEffect(() => {
         if (isUpdate) {
-            GetAllSprint();
+            setIsUpdate(false)
+            GetAllData();
         }
     }, [isUpdate]);
 
@@ -497,24 +540,26 @@ function BlackLog() {
                         {/* Dynamic Sprint Columns */}
                         {Object.keys(columns)
                             .filter((key) => key !== 'backlog' && Array.isArray(columns[key]))
-                            .map((key) => (
-                                <SprintColumn
-                                    key={key}
-                                    id={key}
-                                    title={key}
-                                    timeRange="..."
-                                    items={columns[key]}
-                                    renderTask={(item, idx) => (
-                                        <DraggableTask
-                                            key={item?.storyId}
-                                            id={String(item?.storyId)}
-                                            item={item}
-                                            index={idx}
-                                            name={item?.name}
-                                        />
-                                    )}
-                                />
-                            ))}
+                            .map((key) => {
+                                const sprint = itemsSprint.find((s) => s.name === key); // tìm sprint theo name
+                                return (
+                                    <SprintColumn
+                                        key={key}
+                                        taskSprint={sprint}
+                                        items={columns[key]}
+                                        isUpda={setIsUpdate}
+                                        renderTask={(item, idx) => (
+                                            <DraggableTask
+                                                key={item?.storyId}
+                                                id={String(item?.storyId)}
+                                                item={item}
+                                                index={idx}
+                                                name={item?.name}
+                                            />
+                                        )}
+                                    />  
+                                );
+                            })}
 
                         {/* Backlog section */}
                         <div
