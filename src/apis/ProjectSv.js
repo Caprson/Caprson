@@ -72,11 +72,11 @@ export const createEpic = (datas,param) =>
             reject(error);
         }
     });
-export const createUserStore = (data) =>
+export const createUserStore = (type,data) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: "projects/stories",
+                url: `projects/${type}`,
                 method: 'post',
                 data:data,
                 withCredentials: true,
@@ -211,6 +211,40 @@ export const updateSprint = (id,datas) =>
                 method: 'put',
                 withCredentials: true,
                 data:datas,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+
+export const getUserStoreBySprintId = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/stories/sprint/${id}`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const createBug = (data) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: "bugs/bug",
+                method: 'post',
+                data:data,
+                withCredentials: true,
                 headers: {
                     "X-Project-Id" : localStorage.getItem("projectId")
                 }

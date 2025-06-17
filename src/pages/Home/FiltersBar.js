@@ -2,84 +2,87 @@ import Icon from './Icon';
 
 function FiltersBar() {
     return (
-        <div className="flex flex-wrap items-center space-x-3 mb-4">
-            <input
-                aria-label="Search board"
-                className="border border-gray-300 rounded px-4 py-2 text-base w-48 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
-                placeholder="Search b..."
-                type="search"
-            />
-            <button
-                aria-label="User filter"
-                className="p-2 rounded border border-gray-300 hover:bg-gray-100"
-                type="button"
-            >
-                <Icon className="far fa-user-circle text-gray-600" />
-            </button>
-            <div aria-label="User avatars" className="flex -space-x-2" role="list" title="Users">
-                <div
-                    className="w-7 h-7 rounded-full bg-orange-400 text-white text-sm font-semibold flex items-center justify-center ring-2 ring-white"
-                    title="User H"
+        <div className=" flex justify-between px-8 mb-4">
+            <div className='flex flex-wrap items-center space-x-3'>
+                <input
+                    aria-label="Search board"
+                    className="border border-gray-300 border-solid rounded px-4 py-2 text-xl w-48 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600"
+                    placeholder="Search b..."
+                    type="search"
+                />
+                <button
+                    aria-label="User filter"
+                    className="p-2 rounded border border-gray-300 hover:bg-gray-100"
+                    type="button"
                 >
-                    H
+                    <Icon className="far fa-user-circle text-gray-600" />
+                </button>
+                <div aria-label="User avatars" className="flex -space-x-2" role="list" title="Users">
+                    <div
+                        className="w-9 h-9 rounded-full bg-orange-400 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
+                        title="User H"
+                    >
+                        H
+                    </div>
+                    <div
+                        className="w-9 h-9 rounded-full bg-orange-500 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
+                        title="User D"
+                    >
+                        D
+                    </div>
+                    <div
+                        className="w-9 h-9 rounded-full bg-teal-600 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
+                        title="User LD"
+                    >
+                        LD
+                    </div>
                 </div>
-                <div
-                    className="w-7 h-7 rounded-full bg-orange-500 text-white text-sm font-semibold flex items-center justify-center ring-2 ring-white"
-                    title="User D"
-                >
-                    D
-                </div>
-                <div
-                    className="w-7 h-7 rounded-full bg-teal-600 text-white text-sm font-semibold flex items-center justify-center ring-2 ring-white"
-                    title="User LD"
-                >
-                    LD
-                </div>
+                <button className="border border-gray-300 rounded px-4 py-2 text-xl" type="button">
+                    Type
+                    <svg
+                        className="inline w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <button className="border border-gray-300 rounded px-4 py-2 text-xl" type="button">
+                    Label
+                    <svg
+                        className="inline w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <button className="border border-gray-300 rounded px-4 py-2 text-xl" type="button">
+                    Quick filters
+                    <svg
+                        className="inline w-4 h-4 ml-1"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                    >
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
             </div>
-            <button className="border border-gray-300 rounded px-4 py-2 text-base" type="button">
-                Type
-                <svg
-                    className="inline w-4 h-4 ml-1"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <button className="border border-gray-300 rounded px-4 py-2 text-base" type="button">
-                Label
-                <svg
-                    className="inline w-4 h-4 ml-1"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <button className="border border-gray-300 rounded px-4 py-2 text-base" type="button">
-                Quick filters
-                <svg
-                    className="inline w-4 h-4 ml-1"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                >
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                </svg>
-            </button>
-            <button
-                className="bg-blue-600 hover:bg-blue-700 text-white text-base font-semibold rounded px-4 py-2"
+            <div className='flex flex-wrap items-center space-x-3'>
+                            <button
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xl font-semibold rounded px-4 py-2"
                 type="button"
             >
                 Complete sprint
@@ -101,7 +104,7 @@ function FiltersBar() {
                 </svg>
             </button>
             <button
-                className="border border-blue-600 text-blue-600 rounded px-4 py-2 text-base font-semibold"
+                className="border border-blue-600 text-blue-600 rounded px-4 py-2 text-xl font-semibold"
                 type="button"
             >
                 Group: Stories
@@ -161,6 +164,7 @@ function FiltersBar() {
                     <circle cx="5" cy="12" r="1"></circle>
                 </svg>
             </button>
+            </div>
         </div>
     );
 }

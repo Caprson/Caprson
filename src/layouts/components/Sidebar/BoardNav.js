@@ -14,41 +14,6 @@ function BoardNav() {
       >
         <a
           href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span>Summary</span>
-        </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <path d="M8 7V3m8 4V3M3 11h18M5 21h14a2 2 0 002-2v-5H3v5a2 2 0 002 2z" />
-          </svg>
-          <span>Timeline</span>
-        </a>
-        <a
-          href="#"
           class="flex items-center space-x-1 border-b-2 border-blue-600 text-blue-600 pb-3"
           aria-current="page"
         >
@@ -82,43 +47,7 @@ function BoardNav() {
           </svg>
           <span>Active sprints</span>
         </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
-            <line x1="3" y1="10" x2="21" y2="10" />
-          </svg>
-          <span>Calendar</span>
-        </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <path d="M9 17v-6a2 2 0 012-2h6" />
-            <path d="M13 7h6v6" />
-            <path d="M3 3v18h18" />
-          </svg>
-          <span>Reports</span>
-        </a>
+
         <a
           href="/listwork"
           class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
@@ -137,67 +66,12 @@ function BoardNav() {
           </svg>
           <span>List</span>
         </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <path d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <span>Forms</span>
-        </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 8v4l3 3" />
-          </svg>
-          <span>Goals</span>
-        </a>
-        <a
-          href="#"
-          class="flex items-center space-x-1 border-b-2 border-transparent hover:text-gray-900 hover:border-gray-300 pb-3"
-        >
-          <svg
-            class="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            viewBox="0 0 24 24"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-          <span>All work</span>
-        </a>
-        <div   onClick={() => dispatch(actions.IsShowAddPeople(true))} class="flex items-center space-x-1 border-b-2 border-transparent text-gray-400 pb-3 cursor-default select-none">
+        <div   onClick={() => dispatch(actions.IsShowAddPeople(true))} class="flex items-center hover:bg-blue-700 space-x-1 bg-blue-500 mb-2  border-b-2 border-transparent text-white rounded p-2 cursor-default cursor-pointer select-none">
           <span>Add pleople</span>
-          <span
-            class="text-xs rounded bg-gray-200 px-1.5 py-0.5 font-semibold select-none"
-            >6</span>
+          
           <button
             aria-label="Add"
-            class="ml-1 p-1 rounded hover:bg-gray-100"
+            class="ml-1 p-1 rounded "
             tabindex="-1"
           >
             <svg

@@ -1,12 +1,153 @@
 import UserCircles from './UserCircles';
 import TableRow from './TableRow';
+import { useState, useRef, useEffect } from 'react';
+import * as apis from '../../apis';
+import { toast } from 'react-toastify';
+
 function ListWork() {
+    const inputRef = useRef(null);
+    const dropdownRef = useRef(null);
+    const [dropUp, setDropUp] = useState(false);
+    const [isCreating, setIsCreating] = useState();
+    const today = new Date();
+    const startDate = today.toISOString().split('T')[0]; // yyyy-mm-dd
+
+    const sevenDaysLater = new Date(today);
+    sevenDaysLater.setDate(today.getDate() + 7);
+    const endDate = sevenDaysLater.toISOString().split('T')[0];
+
+    const TYPE_OPTIONS = [
+        {
+            id: 1,
+            name: 'Epic',
+            icon: '⚡',
+            type: 'epic',
+            buildPayload: (name) => ({
+                name: name,
+                description: '',
+                startDate: startDate,
+                endDate: endDate,
+                statusId: 1,
+            }),
+        },
+        {
+            id: 2,
+            name: 'Story',
+            icon: '📘',
+            type: 'stories',
+            buildPayload: (name) => ({
+                epicId: null,
+                sprintId: null,
+                name: name,
+                description: '',
+                priorityId: 1,
+                assignedTo: '',
+                statusId: 1,
+            }),
+        },
+        {
+            id: 4,
+            name: 'Bug',
+            icon: '🐞',
+            buildPayload: (name) => ({
+                projectId: localStorage.getItem('projectId'),
+                storyId: 1,
+                taskId: 1,
+                title: name,
+                description: '',
+                reportedBy: '',
+                assignedTo: '',
+                severityId: 1,
+                priorityId: 1,
+                statusId: 1,
+                createdBy: '',
+            }),
+        },
+    ];
+    const [selectedType, setSelectedType] = useState(TYPE_OPTIONS[1]); // mặc định là Story
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const [userStore, SetUserStore] = useState({
+        name: '',
+    });
     const users = [
         { id: 1, initials: 'H', color: 'bg-orange-500', name: 'hongson31202' },
         { id: 2, initials: 'H', color: 'bg-orange-400', name: 'hongson31202' },
         { id: 3, initials: 'D', color: 'bg-orange-500', name: 'duongtuanhd97' },
         { id: 4, initials: 'LD', color: 'bg-cyan-700', name: 'Lê Chung Dũng' },
     ];
+
+    useEffect(() => {
+        if (dropdownOpen && dropdownRef.current) {
+            const rect = dropdownRef.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const dropdownHeight = 200; // hoặc đo thật nếu muốn chính xác hơn
+
+            setDropUp(spaceBelow < dropdownHeight); // nếu thiếu chỗ thì bật dropUp
+        }
+    }, [dropdownOpen]);
+    const handleCreateClick = () => {
+        setIsCreating(true);
+    };
+    const handleChange = (e) => {
+        SetUserStore({ ...userStore, [e.target.name]: e.target.value });
+    };
+    const handleInputKeyPress = async (e) => {
+        if (e.key === 'Enter') {
+            CreateListStore();
+        }
+    };
+
+    
+
+    const CreateListStore = async () => {
+        if (userStore.name.trim() === '') return;
+        try {
+            const payload = selectedType.buildPayload(userStore.name);
+            if (selectedType.name !== 'Bug') {
+                await apis
+                    .createUserStore(selectedType.type,payload)
+                    .then((res) => {
+                        console.log(res)
+                        SetUserStore({ ...userStore, name: '' })
+                        setIsCreating(false)
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } else {
+                await apis
+                    .createBug(payload)
+                    .then((res) => {
+                        SetUserStore({ ...userStore, name: '' });
+                        setIsCreating(false);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            }
+        } catch (error) {
+            toast.error('Creation failed');
+        }
+    };
+    // 👇 Detect click outside input
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (inputRef.current && !inputRef.current.contains(event.target)) {
+                setIsCreating(false);
+            }
+        };
+
+        if (isCreating) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isCreating]);
 
     const rows = [
         {
@@ -113,6 +254,123 @@ function ListWork() {
             updated: '2/9/2024',
             reporter: users[3],
         },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
+        {
+            type: 'bug',
+            key: 'NHOM4-9',
+            summary: 'Lỗi giao diện',
+            status: 'TO DO',
+            sprint: 'NHOM4 Sprint 3',
+            assignee: users[0],
+            done: false,
+            priority: 'h',
+            created: '24/08/2024',
+            updated: '2/9/2024',
+            reporter: users[3],
+        },
     ];
 
     return (
@@ -196,54 +454,129 @@ function ListWork() {
             </div>
 
             {/* Table */}
-            <div className="relative h-full w-full">
-                <div className="h-full">
-                    <div className="overflow-x-auto min-w-auto min-h-auto overflow-y-auto border border-gray-200 rounded-md">
-                        <table className="min-w-full border-collapse border border-gray-200 text-xl">
-                            <thead className="bg-gray-100 text-gray-700 font-semibold select-none">
-                                <tr>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-16">Type</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-28">Key</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left min-w-[300px]">
-                                        Summary
-                                    </th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-24">Status</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-40">Comments</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-36">Sprint</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-48">Assignee</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-28">Priority</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-28">Created</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-28">Updated</th>
-                                    <th className="border border-gray-200 px-4 py-2 text-left w-28">Reporter</th>
-                                </tr>
-                            </thead>
-                            <tbody className="text-gray-900">
-                                {rows.map((row) => (
-                                    <TableRow key={row.key} row={row} />
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+            <div className="border overflow-x-hidden overflow-y-hidden border-gray-300  rounded-xl ">
+                <div className="overflow-x-auto overflow-y-auto max-h-[450px] shadow">
+                    <table className="min-w-[900px] w-full border-collapse text-2xl text-gray-700">
+                        <thead className="bg-gray-100 sticky top-0 z-10">
+                            <tr>
+                                <th className="w-12 p-4 border-b border-r border-gray-300 text-center">
+                                    <input
+                                        type="checkbox"
+                                        aria-label="Select all"
+                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                    />
+                                </th>
+                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-center">
+                                    Type
+                                </th>
+                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">Key</th>
+                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                    Summary
+                                </th>
+                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                    Status
+                                </th>
+                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                    Comments
+                                </th>
+                                <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
+                                    Sprint
+                                </th>
+                                <th className="w-12 p-3 border-b border-gray-300" />
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map((data, index) => (
+                                <TableRow key={index} row={data} />
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
-            </div>
+                {isCreating ? (
+                    <div
+                        ref={inputRef}
+                        className="flex items-center border border-blue-500 rounded-lg px-3 py-2 mt-4 focus-within:ring-2 focus-within:ring-blue-500 w-full shadow-sm relative"
+                    >
+                        {/* Dropdown Trigger */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setDropdownOpen(!dropdownOpen)}
+                                className="flex items-center text-blue-600 font-medium border border-blue-500 rounded px-2 py-1 mr-3 text-2xl bg-white"
+                            >
+                                <span>{selectedType.icon}</span>
+                                <i className="fas text-xl fa-caret-down ml-1" />
+                            </button>
 
-            {/* Create button */}
-            <button
-                className="mt-3 flex items-center gap-2 text-gray-700 font-semibold text-xl focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-1"
-                aria-label="Create new item"
-            >
-                <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Create
-            </button>
+                            {/* Dropdown Menu */}
+                            {dropdownOpen && (
+                                <div
+                                    ref={dropdownRef}
+                                    className={`absolute z-10 bg-white border rounded shadow-md w-96 ${
+                                        dropUp ? 'bottom-full mb-1' : 'top-full mt-1'
+                                    }`}
+                                >
+                                    {TYPE_OPTIONS.map((type) => (
+                                        <div
+                                            key={type.id}
+                                            className={`px-3 py-2 hover:bg-blue-100 cursor-pointer flex items-center gap-2 text-xl ${
+                                                selectedType.id === type.id ? 'bg-blue-50 font-semibold' : ''
+                                            }`}
+                                            onClick={() => {
+                                                setSelectedType(type);
+                                                setDropdownOpen(false);
+                                            }}
+                                        >
+                                            <span>{type.icon}</span>
+                                            <span>{type.name}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Input */}
+                        <input
+                            type="text"
+                            value={userStore.name}
+                            name="name"
+                            onChange={handleChange}
+                            onKeyDown={handleInputKeyPress}
+                            className="flex-1 outline-none text-xl placeholder-gray-400"
+                            placeholder="What needs to be done?"
+                            autoFocus
+                        />
+                        <button type="button" className="text-gray-600 hover:text-black mr-2">
+                            <i className="fas fa-user-circle text-3xl" />
+                        </button>
+                        {/* Button Create */}
+                        <button
+                            onClick={CreateListStore}
+                            className="bg-blue-600 text-white px-4 py-1 rounded hover:bg-blue-700 text-lg font-semibold flex items-center gap-1"
+                        >
+                            Create <span>↩</span>
+                        </button>
+                    </div>
+                ) : (
+                    <button
+                        className="mt-4 flex items-center gap-2 text-gray-700 font-semibold text-xl p-4 hover:bg-neutral-100 w-full"
+                        type="button"
+                        onClick={handleCreateClick}
+                    >
+                        <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={2}
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

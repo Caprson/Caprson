@@ -3,7 +3,8 @@ import actionType from '../actions/actionType';
 const initState = {
     check_login: false,
     isShowPopup: false,
-    isShowAddpeople: false
+    isShowAddpeople: false,
+    isShowRightPanel:false
 };
 
 const appReducer = (state = initState, action) => {
@@ -22,6 +23,11 @@ const appReducer = (state = initState, action) => {
             return {
                 ...state,
                 isShowAddpeople: action.isShow,
+            };
+        case actionType.GET_SHOWRIGHTPANEL:
+            return {
+                ...state,
+                isShowRightPanel: action.isShow,
             };
 
         default:

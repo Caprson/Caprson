@@ -29,20 +29,20 @@ instance.interceptors.response.use(
         const originalRequest = error.config;
 
         // Nếu lỗi 401 và chưa retry
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if ((error.response?.status === 401 || error.response?.status === 403 ) && !originalRequest._retry) {
             originalRequest._retry = true;
             const refreshTk =  localStorage.getItem('refreshToken');
-            const rfToken = {refreshToken: refreshTk}
             try {
                 const res = await axios.post(
                     'http://localhost:8080/users/auth/refresh',
-                    {data:rfToken},
+                    {refreshToken:refreshTk},
                     { withCredentials: true }
                 );
 
-                const newAccessToken = res.data.accessToken;
+                const newAccessToken = res.data.data.accessToken;
+                const newRefreshToken = res.data.data.refreshToken
                 localStorage.setItem('accessToken', newAccessToken);
-
+                localStorage.setItem('refreshToken', newRefreshToken);
                 // Gắn accessToken mới vào header rồi gửi lại request
                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
                 return instance(originalRequest);

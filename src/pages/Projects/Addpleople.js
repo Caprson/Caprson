@@ -64,12 +64,13 @@ function Addpleople() {
         <div
             aria-labelledby="modal-title"
             aria-modal="true"
-            class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4"
+            class="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             role="dialog"
         >
-            <div ref={modalRef} class="bg-white rounded-md shadow-lg max-w-md w-full p-6 relative" role="document">
+            <div ref={modalRef} class="bg-white rounded-md shadow-lg max-w-2xl w-full drop-shadow-lg p-6 relative" role="document">
                 <button
                     aria-label="Close"
+                    onClick={()=> dispatch(actions.IsShowAddPeople(false))}
                     class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
                 >
                     <svg
@@ -87,11 +88,11 @@ function Addpleople() {
                         <line x1="6" x2="18" y1="6" y2="18"></line>
                     </svg>
                 </button>
-                <h2 class="text-lg font-semibold text-gray-900 mb-6 leading-tight" id="modal-title">
+                <h2 class="text-2xl font-semibold text-gray-900 mb-6 leading-tight" id="modal-title">
                     Add people to Core Work Wave
                 </h2>
                 <form onSubmit={handleSubmit}>
-                    <label class="block text-sm font-medium text-gray-900 mb-1" for="names-emails">
+                    <label class="block text-xl font-medium text-gray-900 mb-1" for="names-emails">
                         Names or emails
                         <span class="text-red-600">*</span>
                     </label>
@@ -104,7 +105,7 @@ function Addpleople() {
                         required=""
                         type="text"
                     />
-                    <p class="text-xs text-gray-500 mt-2 mb-4">or add from</p>
+                    <p class="text-lg text-gray-500 mt-2 mb-4">or add from</p>
                     {/* <div class="flex space-x-3 mb-6">
                         <button
                             class="flex items-center border border-gray-300 rounded-md px-3 py-2 text-gray-900 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600"
@@ -146,7 +147,7 @@ function Addpleople() {
                             Microsoft
                         </button>
                     </div> */}  
-                    <label class="block text-sm font-medium text-gray-900 mb-1" for="role">
+                    <label class="block text-xl font-medium text-gray-900 mb-1" for="role">
                         Role
                     </label>
                     <select
@@ -163,7 +164,7 @@ function Addpleople() {
                         <option value={5}>Tester</option>
                         <option value={6}>Viewer</option>
                     </select>
-                    <p class="text-xs text-gray-500 mt-4 mb-6 leading-tight">
+                    <p class="text-sm text-gray-500 mt-4 mb-6 leading-tight">
                         This site is protected by reCAPTCHA and the Google
                         <a
                             class="text-blue-600 underline"
@@ -185,7 +186,9 @@ function Addpleople() {
                         apply.
                     </p>
                     <div class="flex justify-end space-x-4">
-                        <button class="text-gray-700 font-semibold hover:underline focus:outline-none" type="button">
+                        <button
+                            onClick={()=> dispatch(actions.IsShowAddPeople(false))}
+                        class="text-gray-700 font-semibold bg-neutral-200 hover:bg-neutral-300 p-3 rounded focus:outline-none" type="button">
                             Cancel
                         </button>
                         <button

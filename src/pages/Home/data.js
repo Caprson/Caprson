@@ -1,6 +1,6 @@
 export const initialData = [
     {
-        id: 'todo',
+        id:1,
         title: 'To Do',
         tasks: [
             { id: 'task-1', title: 'Thiết kế giao diện' },
@@ -8,12 +8,12 @@ export const initialData = [
         ],
     },
     {
-        id: 'in-progress',
+        id: 2,
         title: 'In Progress',
         tasks: [{ id: 'task-3', title: 'Phát triển API' }],
     },
     {
-        id: 'done',
+        id: 3,
         title: 'Done',
         tasks: [{ id: 'task-4', title: 'Triển khai CI/CD' }],
     },
