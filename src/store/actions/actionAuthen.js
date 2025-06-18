@@ -18,7 +18,7 @@ export const IsShowAddPeople = (bool) =>{
         isShow: bool 
     }
 }
-export const IsShowRighrPanel = (bool) =>{
+export const IsShowRightPanel = (bool) =>{
     return {
         type:actionType.GET_SHOWRIGHTPANEL,
         isShow: bool 

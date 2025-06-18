@@ -254,6 +254,38 @@ export const createBug = (data) =>
             reject(error);
         }
     });
+export const getUserStoryById= (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/stories/${id}`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getSprintById= (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/sprint/${id}`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
 
 
 
