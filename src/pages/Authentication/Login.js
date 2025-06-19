@@ -1,4 +1,4 @@
-import * as apis from '../../apis'
+import * as apis from '../../apis';
 import * as actions from '../../store/actions';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
@@ -55,10 +55,10 @@ function Login() {
                 await apis
                     .login(formData)
                     .then((res) => {
-                        console.log(res)
+                        console.log(res);
                         if (res.status === 200) {
                             toast.success('login success');
-                            
+
                             localStorage.setItem('accessToken', res.data.data.accessToken);
                             localStorage.setItem('refreshToken', res.data.data.refreshToken);
                             dispatch(actions.checkLogin(true));
@@ -76,7 +76,6 @@ function Login() {
         };
         Login();
     };
-
 
     const handleLogout = () => {
         const FetchData = async () => {
@@ -119,10 +118,10 @@ function Login() {
                             alt="Blue globe icon representing Atlas logo"
                             className="w-10 h-10"
                             height={40}
-                            src="https://storage.googleapis.com/a1aa/image/b9346d2b-79aa-4175-38ac-9bb14c2a87c5.jpg"
+                            src="./logo_2.png"
                             width={40}
                         />
-                        <span className="text-[#0c71f2] font-semibold text-3xl ml-2">Atlas</span>
+                        <span className="text-[#0c71f2] font-semibold text-3xl ml-2">WorkWave</span>
                     </div>
                     <h2 className="text-center font-semibold text-gray-900 mb-6 text-xl">Đăng nhập để tiếp tục</h2>
                     <form onSubmit={handleSubmit}>
@@ -179,16 +178,12 @@ function Login() {
                     </form>
                     <p className="text-center text-gray-600 text-xl mb-4">Hoặc tiếp tục với:</p>
                     <div className="text-center text-[#0c71f2] text-xl mb-6">
-                        <a className="underline hover:text-[#095ecb]" href="#">
-                            Bạn không đăng nhập được?
-                        </a>
-                        <span>·</span>
-                        <a className="underline hover:text-[#095ecb]" href="#">
-                            Tạo tài khoản
+                        <a className="underline hover:text-[#095ecb]" href="/signup">
+                            Bạn chưa có tài khoản<span>·</span>Tạo tài khoản
                         </a>
                     </div>
                     <hr className="border-gray-300 mb-6" />
-                    <div className="text-center text-gray-700 text-xs leading-relaxed">
+                    {/* <div className="text-center text-gray-700 text-xs leading-relaxed">
                         <div className="flex justify-center items-center mb-2 space-x-2">
                             <img
                                 alt="Atlassian logo icon"
@@ -230,7 +225,7 @@ function Login() {
                                 Lưu ý dành cho người dùng
                             </a>
                         </p>
-                    </div>
+                    </div> */}
                 </main>
             </div>
         </>

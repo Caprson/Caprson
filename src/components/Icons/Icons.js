@@ -263,12 +263,7 @@ export const ExploreActiveIcon = ({ width = '3.2rem', height = '3.2rem', classNa
 );
 
 export const LogoWeb = ({ width = '40px', height = '40px' }) => (
-  <img
-    src={`${process.env.PUBLIC_URL}/logo_ww.jpg`}
-    alt="Logo"
-    style={{ width, height }}
-    className="object-contain"
-  />
+    <img src={`${process.env.PUBLIC_URL}/logo_1.png`} alt="Logo" style={{ width, height }} className="object-contain" />
 );
 
 export const YourWork = ({ width = '2rem', height = 'rem', className }) => {

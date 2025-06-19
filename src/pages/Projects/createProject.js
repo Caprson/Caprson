@@ -60,7 +60,7 @@ export default function CreateProject() {
                             placeholder="Try a team name, project goal, milestone..."
                             className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                         />
-                        <div className="flex justify-between items-center mb-2">
+                        {/* <div className="flex justify-between items-center mb-2">
                             <span className="text-xl font-semibold text-gray-700">Template</span>
                             <button
                                 type="button"
@@ -80,8 +80,8 @@ export default function CreateProject() {
                                     <path d="M9 18l6-6-6-6"></path>
                                 </svg>
                             </button>
-                        </div>
-                        <button
+                        </div> */}
+                        {/* <button
                             type="button"
                             className="w-full flex items-center bg-gray-100 rounded-md shadow-sm border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
                         >
@@ -151,7 +151,7 @@ export default function CreateProject() {
                                 <path d="M9 18l6-6-6-6"></path>
                             </svg>
                             Show more
-                        </button>
+                        </button> */}
                         <div>
                             <div>
                                 <label className="block text-xl font-semibold mb-1" htmlFor="date_start">
@@ -201,7 +201,7 @@ export default function CreateProject() {
                             <input
                                 id="project-name"
                                 type="text"
-                                name='description'
+                                name="description"
                                 onChange={handleChange}
                                 placeholder="Try a team name, project goal, milestone..."
                                 className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"

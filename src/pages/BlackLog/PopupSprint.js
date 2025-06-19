@@ -1,9 +1,9 @@
 import { useRef, useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
-import * as apis from '../../apis'
+import * as apis from '../../apis';
 import { toast } from 'react-toastify';
-function PopupSprint({ setIsUpdate}) {
+function PopupSprint({ setIsUpdate }) {
     const modalRef = useRef();
     const { isShowPopup } = useSelector((state) => state.app);
     const dispatch = useDispatch();
@@ -14,32 +14,32 @@ function PopupSprint({ setIsUpdate}) {
         statusId: 1,
         goal: '',
     });
-    const handleChange  = (e) => {
-        setSprint({...sprint, [e.target.name]: e.target.value})
-    }
+    const handleChange = (e) => {
+        setSprint({ ...sprint, [e.target.name]: e.target.value });
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log(sprint)
-        const PostData = async() => {
+        console.log(sprint);
+        const PostData = async () => {
             try {
                 await apis
-                            .createSprint(sprint)
-                            .then((res) => {
-                                console.log(res)
-                                setIsUpdate(true)
-                                dispatch(actions.IsShowPopup(false));
-                            })
-                            .catch((error) => {
-                                console.error('Registration error: ', error);
-                                toast.error('An error occurred during sign up. Please try again.');
-                            });
+                    .createSprint(sprint)
+                    .then((res) => {
+                        console.log(res);
+                        setIsUpdate(true);
+                        dispatch(actions.IsShowPopup(false));
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
             } catch (error) {
                 toast.error('An error occurred during sign up. Please try again.');
             }
-         }
-         PostData();
-    }
+        };
+        PostData();
+    };
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -66,14 +66,14 @@ function PopupSprint({ setIsUpdate}) {
                 className="bg-white rounded-md max-w-3xl w-full p-8 drop-shadow-lg"
             >
                 <h2 id="modal-title" class="text-gray-900 font-semibold text-3xl mb-2">
-                    Edit sprint: <span class="font-bold">NHOM4 Sprint 3</span>
+                    Create sprint:
                 </h2>
                 <p class="text-gray-700 text-xl mb-6">
                     Required fields are marked with an asterisk
                     <span class="text-red-600 font-bold">*</span>
                 </p>
 
-                <form onSubmit={handleSubmit} class="space-y-5" >
+                <form onSubmit={handleSubmit} class="space-y-5">
                     <div>
                         <label for="sprint-name" class="block text-gray-700 text-xl font-semibold mb-1">
                             Sprint name <span class="text-red-600">*</span>
@@ -109,12 +109,11 @@ function PopupSprint({ setIsUpdate}) {
                                 <input
                                     id="start-date"
                                     type="date"
-                                    name='startDate'
+                                    name="startDate"
                                     onChange={handleChange}
                                     placeholder="e.g. 12/31/2018"
                                     class="w-1/2 focus:outline-none"
                                 />
-                                
                             </div>
                         </div>
                         <div class="flex-1">
@@ -125,12 +124,11 @@ function PopupSprint({ setIsUpdate}) {
                                 <input
                                     id="end-date"
                                     type="date"
-                                    name='endDate'
+                                    name="endDate"
                                     onChange={handleChange}
                                     placeholder="e.g. 01/14/2019"
                                     class="w-1/2 focus:outline-none"
                                 />
-                                
                             </div>
                         </div>
                     </div>
@@ -142,7 +140,7 @@ function PopupSprint({ setIsUpdate}) {
                         <textarea
                             id="sprint-goal"
                             rows="6"
-                            name='goal'
+                            name="goal"
                             onChange={handleChange}
                             class="w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 text-xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
                         ></textarea>
