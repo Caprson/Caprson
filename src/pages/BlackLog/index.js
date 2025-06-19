@@ -9,8 +9,9 @@ import PopupSprint from './PopupSprint';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
 import RightPanel from './RightPanel';
+import useUserStoryEvents from '../../websocket/useUserStoryEvents';
 
-function DraggableTask({ id, index, name, item, updateData,detail }) {
+function DraggableTask({ id, index, name, item, updateData, detail }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: String(id) });
     const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
     const [showStatus, setShowStatus] = useState(false);
@@ -187,7 +188,6 @@ function DraggableTask({ id, index, name, item, updateData,detail }) {
                 return 'bg-gray-200';
         }
     }
-   
 
     const isDraggingRef = useRef(false);
     const mouseMovedRef = useRef(false);
@@ -202,8 +202,8 @@ function DraggableTask({ id, index, name, item, updateData,detail }) {
             window.removeEventListener('mouseup', handleMouseUp);
 
             if (!mouseMovedRef.current) {
-                dispatch(actions.IsShowRightPanel(true))
-                detail(item)
+                dispatch(actions.IsShowRightPanel(true));
+                detail(item);
             }
 
             isDraggingRef.current = false;
@@ -235,7 +235,11 @@ function DraggableTask({ id, index, name, item, updateData,detail }) {
             style={style}
             className="items-center hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
         >
-            <div {...listeners}  ref={containerRef} className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "></div>
+            <div
+                {...listeners}
+                ref={containerRef}
+                className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "
+            ></div>
             <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
                 <div className="flex items-center space-x-3">
                     <input
@@ -469,7 +473,7 @@ function BlackLog() {
     const [activeId, setActiveId] = useState(null);
     const [isUpdate, setIsUpdate] = useState(false);
     const [columns, setColumns] = useState({});
-    const [detail,setDetail] = useState({})
+    const [detail, setDetail] = useState({});
     const { isShowPopup, isShowRightPanel } = useSelector((state) => state.app);
     const dispatch = useDispatch();
     const [userStore, SetUserStore] = useState({
@@ -612,6 +616,21 @@ function BlackLog() {
         };
     }, [isCreating]);
 
+    useUserStoryEvents({
+        onCreated: (story) => {
+            toast.success(`Story created: ${story.name}`);
+            GetAllData();
+        },
+        onUpdated: (story) => {
+            toast.info(`Story updated: ${story.name}`);
+            GetAllData();
+        },
+        onDeleted: (story) => {
+            toast.warn(`Story deleted`);
+            GetAllData();
+        },
+    });
+
     const handleDragEnd = ({ active, over }) => {
         if (!over || !active?.id) return;
 
@@ -666,8 +685,8 @@ function BlackLog() {
         <div className="h-full p-4 space-y-6">
             <Filters />
 
-            <div className='flex h-full w-full'>
-                <div className='w-full h-full'>
+            <div className="flex h-full w-full">
+                <div className="w-full h-full">
                     <DndContext
                         onDragStart={(event) => setActiveId(event.active.id)}
                         onDragEnd={(event) => {
@@ -786,7 +805,7 @@ function BlackLog() {
                         </div>
                     </DndContext>
                 </div>
-                {isShowRightPanel ? <RightPanel  key={detail.storyId} item={detail.storyId}/> : <></>}
+                {isShowRightPanel ? <RightPanel key={detail.storyId} item={detail.storyId} /> : <></>}
             </div>
 
             <DragOverlay>

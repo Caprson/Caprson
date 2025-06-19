@@ -1,9 +1,10 @@
 import { DndContext } from '@dnd-kit/core';
-import { initialData } from './data';
+import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
+
 import { Column } from './Column';
 import * as apis from '../../apis';
-import { useState, useRef, useEffect } from 'react';
-import { toast } from 'react-toastify';
+import useUserStoryEvents from '../../websocket/useUserStoryEvents';
 
 const STATUS_MAP = {
     1: 'TO DO',
@@ -12,127 +13,128 @@ const STATUS_MAP = {
     4: 'DONE',
 };
 
+const INITIAL_COLUMNS = Object.entries(STATUS_MAP).map(([id, title]) => ({
+    id,
+    title,
+    tasks: [],
+}));
+
 export function Board() {
-    const [columns, setColumns] = useState([
-        { id: '1', title: 'TO DO', tasks: [] },
-        { id: '2', title: 'IN PROGRESS', tasks: [] },
-        { id: '3', title: 'IN REVIEW', tasks: [] },
-        { id: '4', title: 'DONE', tasks: [] },
-    ]);
+    const [columns, setColumns] = useState(INITIAL_COLUMNS);
 
-    const GetAllSprint = async () => {
-        await apis
-            .getSprintByProject()
-            .then(async (res) => {
-                const sprintStarted = res?.data?.data.filter((sprint) => sprint?.statusId === 2);
-                const grouped = {
-                    1: [],
-                    2: [],
-                    3: [],
-                    4: [],
-                };
-
-                const promises = sprintStarted.map((element) => GetUserStory(element?.sprintId));
-
-                const allUserStories = await Promise.all(promises); // => [[], [], [story1, story2], ...]
-
-                const mergedUserStories = allUserStories.flat(); // Nối tất cả mảng con thành một mảng lớn
-
-                mergedUserStories.forEach((story) => {
-                    if (grouped[story.statusId]) {
-                        grouped[story.statusId].push(story);
-                    }
-                });
-                setColumns((prevCols) =>
-                    prevCols.map((col) => ({
-                        ...col,
-                        tasks: grouped[parseInt(col.id)] || [],
-                    })),
-                );
-            })
-            .catch((error) => {
-                console.error('Registration error: ', error);
-                toast.error('An error occurred during sign up. Please try again.');
-            });
-    };
-
-    const GetUserStory = async (sprintId) => {
+    // Fetch user stories from active sprints
+    const fetchAllUserStories = async () => {
         try {
-            const res = await apis.getUserStoreBySprintId(sprintId);
-            return res.data.data; // Trả về mảng userStory
-        } catch (error) {
-            console.error('Failed to fetch user stories:', error);
-            toast.error('An error occurred. Please try again.');
-            return []; // Trả về mảng rỗng nếu lỗi để tránh lỗi undefined
+            const { data } = await apis.getSprintByProject();
+            const sprints = data?.data || [];
+            const activeSprints = sprints.filter((s) => s.statusId === 2);
+
+            const allStories = (
+                await Promise.all(activeSprints.map((s) => fetchUserStoriesBySprint(s.sprintId)))
+            ).flat();
+
+            const groupedStories = groupUserStoriesByStatus(allStories);
+            setColumns((prev) =>
+                prev.map((col) => ({
+                    ...col,
+                    tasks: groupedStories[col.id] || [],
+                })),
+            );
+        } catch (err) {
+            console.error('Failed to fetch sprints:', err);
+            toast.error('Failed to load user stories.');
         }
     };
-    const UpdateUserStory = async (storeId, data) => {
-        await apis
-            .editUserStore(storeId, data)
-            .then((res) => {
-                GetAllSprint();
-            })
-            .catch((error) => {
-                console.error('Failed to fetch user stories:', error);
-                toast.error('An error occurred during sign up. Please try again.');
-            });
+
+    const fetchUserStoriesBySprint = async (sprintId) => {
+        try {
+            const { data } = await apis.getUserStoreBySprintId(sprintId);
+            return data?.data || [];
+        } catch (err) {
+            console.error('Failed to fetch user stories:', err);
+            toast.error('Failed to load user stories.');
+            return [];
+        }
     };
 
-    useEffect(() => {
-        GetAllSprint();
-    }, []);
+    const groupUserStoriesByStatus = (stories) => {
+        return stories.reduce((acc, story) => {
+            const key = story.statusId?.toString();
+            if (!acc[key]) acc[key] = [];
+            acc[key].push(story);
+            return acc;
+        }, {});
+    };
 
-    function onDragEnd({ active, over }) {
-        if (!over) return;
+    const updateUserStory = async (storyId, updatedData) => {
+        try {
+            await apis.editUserStore(storyId, updatedData);
+        } catch (err) {
+            console.error('Failed to update user story:', err);
+            toast.error('Failed to update story.');
+        }
+    };
 
-        const sourceCol = columns.find((col) => col.tasks.some((t) => String(t.storyId) === active.id));
+    const handleDragEnd = ({ active, over }) => {
+        if (!over || active.id === over.id) return;
 
-        const destCol = columns.find((col) => col.id === over.id);
+        const sourceColumn = columns.find((col) => col.tasks.some((task) => String(task.storyId) === active.id));
+        const destColumn = columns.find((col) => col.id === over.id);
 
-        if (!sourceCol || !destCol || sourceCol.id === destCol.id) return;
+        if (!sourceColumn || !destColumn || sourceColumn.id === destColumn.id) return;
 
-        const movingTask = sourceCol.tasks.find((t) => String(t.storyId) === active.id);
+        const movingTask = sourceColumn.tasks.find((t) => String(t.storyId) === active.id);
 
-        // cập nhật local UI
+        // Update local UI
         setColumns((prev) =>
             prev.map((col) => {
-                if (col.id === sourceCol.id)
+                if (col.id === sourceColumn.id) {
+                    return { ...col, tasks: col.tasks.filter((t) => String(t.storyId) !== active.id) };
+                }
+                if (col.id === destColumn.id) {
                     return {
                         ...col,
-                        tasks: col.tasks.filter((t) => String(t.storyId) !== active.id),
+                        tasks: [...col.tasks, { ...movingTask, statusId: parseInt(destColumn.id) }],
                     };
-                if (col.id === destCol.id)
-                    return {
-                        ...col,
-                        tasks: [...col.tasks, { ...movingTask, statusId: parseInt(destCol.id) }],
-                    };
+                }
                 return col;
             }),
         );
 
-        // gọi API update status
-        const update = {
+        // Update backend
+        const updated = {
             epicId: movingTask.epicId,
-            sprintId: movingTask?.sprintId,
-            name: movingTask?.name,
-            description: movingTask?.description,
-            priorityId: movingTask?.priorityId,
-            assignedTo: movingTask?.assignedTo,
-            statusId: parseInt(destCol.id), // cập nhật mới!
+            sprintId: movingTask.sprintId,
+            name: movingTask.name,
+            description: movingTask.description,
+            priorityId: movingTask.priorityId,
+            assignedTo: movingTask.assignedTo,
+            statusId: parseInt(destColumn.id),
         };
 
-        UpdateUserStory(movingTask?.storyId, update);
-    }
+        updateUserStory(movingTask.storyId, updated);
+    };
+
+    useEffect(() => {
+        fetchAllUserStories();
+    }, []);
+
+    // Realtime updates via WebSocket
+    useUserStoryEvents({
+        onCreated: fetchAllUserStories,
+        onUpdated: fetchAllUserStories,
+        onDeleted: fetchAllUserStories,
+    });
 
     return (
         <div className="max-h-full h-5/6 overflow-x-hidden overflow-y-hidden">
             <div className="z-10 relative h-full flex">
                 <div className="min-w-[0px] w-full h-full">
-                    <div className="relative max-h-full overflow-x-auto overflow-y-auto w-full h-full ">
-                        <section className="select-none min-h-full box-border min-w-fit pl-[20px] pb-[24px] items-stretch flex-row justify-start flex-nowrap flex pr-[24px] gap-3 ">
+                    <div className="relative max-h-full overflow-x-auto overflow-y-auto w-full h-full">
+                        <section className="select-none min-h-full box-border min-w-fit pl-[20px] pb-[24px] items-stretch flex-row justify-start flex-nowrap flex pr-[24px] gap-3">
                             <div className="basis-0 shrink grow">
-                                <DndContext onDragEnd={onDragEnd}>
-                                    <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] h-full gap-4 grid-flow-col ">
+                                <DndContext onDragEnd={handleDragEnd}>
+                                    <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] h-full gap-4 grid-flow-col">
                                         {columns.map((col) => (
                                             <Column key={col.id} column={col} />
                                         ))}
