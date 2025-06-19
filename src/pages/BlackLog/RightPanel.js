@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import * as apis from '../../apis';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
+import { FaChevronUp, FaChevronDown, FaEquals } from 'react-icons/fa';
 
 function RightPanel({ item }) {
     const modalRef = useRef();
@@ -15,9 +16,16 @@ function RightPanel({ item }) {
     const [sprint, setSprint] = useState({});
     const [dataUserStory, setDataUserStory] = useState();
     const [updateUserStory, setUpdateDataUserStory] = useState();
+    const [isEditing, setIsEditing] = useState(false);
+    const [description, setDescription] = useState('');
     const { isShowRightpanel } = useSelector((state) => state.app);
     const dispatch = useDispatch();
-
+    const priority = {
+        1: 'Low',
+        2: 'Medium',
+        3: 'High',
+        4: 'Highest',
+    };
     const handleSubmid = async () => {
         const task = {
             storyId: userStory.storyId,
@@ -32,8 +40,6 @@ function RightPanel({ item }) {
         await apis
             .createUserStore('tasks', task)
             .then((res) => {
-                
-                console.log('Creating subtask:', res.data);
                 setSubTaskName('');
                 setIsShowSubTask(false);
             })
@@ -55,7 +61,7 @@ function RightPanel({ item }) {
     };
     const getSprintById = async (id) => {
         await apis
-            .getSprintByProject(id)
+            .getSprintById(id)
             .then((res) => {
                 setSprint(res.data.data);
             })
@@ -121,12 +127,11 @@ function RightPanel({ item }) {
         };
         PostData();
     };
-    console.log(userStory);
     useEffect(() => {
-        if (!!userStory) {
-            getUser(userStory.assignedTo);
-            getUserRP(userStory.updatedBy);
-            getSprintById(userStory.sprintId);
+        if (!!userStory && !!userStory.assignedTo && userStory.updatedBy != '') {
+            getUser(userStory?.assignedTo);
+            getUserRP(userStory?.updatedBy);
+            if (!!userStory.sprintId) getSprintById(userStory.sprintId);
         }
     }, [userStory]);
     function getInitials(name = '') {
@@ -134,6 +139,55 @@ function RightPanel({ item }) {
         const words = name.trim().split(' ');
         if (words.length === 1) return words[0][0].toUpperCase();
         return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+    }
+
+    console.log(priority[userReport.priorityId]);
+    function getPriorityIcon(priority) {
+        switch (priority) {
+            case 'Highest':
+                return (
+                    <span className="text-red-500 text-sm">
+                        <FaChevronUp />
+                        <FaChevronUp className="-mt-2" />
+                    </span>
+                );
+            case 'High':
+                return <FaChevronUp className="text-red-400 text-sm" />;
+            case 'Medium':
+                return <FaEquals className="text-gray-500 text-sm" />;
+            case 'Low':
+                return <FaChevronDown className="text-blue-400 text-sm" />;
+            default:
+                return null;
+        }
+    }
+    console.log(userStory);
+    const handleChange = async (e) => {
+        const update = {
+            epicId: userStory?.epicId,
+            sprintId: userStory?.sprintId,
+            name: userStory?.name,
+            description: userStory?.description,
+            priorityId: userStory?.priorityId,
+            assignedTo: userStory?.assignedTo,
+            statusId: e.target.value,
+        };
+        try {
+            await apis
+                .editUserStore(userStory?.storyId, update)
+                .then((res) => {
+                    getUserStoryById(userStory?.storyId);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+    const handleSave = ()=>{
+
     }
     return (
         <div class="flex flex-col w-2/5 border-l border-gray-200 overflow-y-auto p-6 space-y-6">
@@ -155,7 +209,7 @@ function RightPanel({ item }) {
                     </button>
                 </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">{userStory?.name}</h1>
+            <h1 class="text-2xl font-bold text-gray-600">{userStory?.name}</h1>
             <button
                 onClick={() => setIsShowSubTask(true)}
                 class="border border-solid border-gray-300 rounded-md px-3 py-1 text-xl font-normal hover:bg-gray-100 flex items-center space-x-1 w-max"
@@ -165,21 +219,51 @@ function RightPanel({ item }) {
             </button>
             <div class="flex items-center space-x-2">
                 <select
-                    class="text-sm font-semibold bg-gray-300 text-gray-700 rounded px-3 py-1 border border-gray-300 cursor-pointer"
+                    onChange={handleChange}
+                    value={userStory.statusId}
+                    class="text-sm font-semibold bg-gray-100 text-gray-700 rounded px-3 py-1 border border-gray-300 cursor-pointer"
                     aria-label="Status"
                 >
-                    <option>To Do</option>
+                    <option value={1}>To Do</option>
+                    <option value={2}>IN PROGRESS</option>
+                    <option value={3}>IN REVIEW</option>
+                    <option value={4}>DONE</option>
                 </select>
                 <button class="border border-gray-300 rounded-md px-3 py-1 text-sm font-normal hover:bg-gray-100">
                     <i class="fas fa-bolt"></i>
                 </button>
             </div>
-            <div>
-                <h2 class="font-semibold text-gray-900 mb-1">Description</h2>
-                <textarea
-                    placeholder="Add a description..."
-                    class="w-full border border-gray-300 rounded-md p-2 text-gray-500 text-xl resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500"
-                ></textarea>
+            <div className="mb-4">
+                <h2 className="font-semibold text-gray-600 mb-1">Description</h2>
+
+                {isEditing ? (
+                    <div>
+                        <textarea
+                        value={userStory.description}
+                        onChange={(e)=> setDescription(e.target.value)}
+                        onBlur={() => {
+                            if (!userStory.description.trim()) setIsEditing(false);
+                        }}
+                        autoFocus
+                        placeholder="Add a description..."
+                        className="w-full border border-gray-300 rounded-md p-2 text-gray-700 text-lg resize-y min-h-[80px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button disabled={!subTaskName.trim()}
+                            onClick={() => {
+                                
+                                // TODO: handle API create here
+                            }}
+                            className={`px-3 py-2 rounded text-xl font-semibold ${
+                                subTaskName.trim()
+                                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            }`}>Save</button>
+                    </div>
+                ) : (
+                    <div className="text-gray-500 text-lg cursor-pointer" onClick={() => setIsEditing(true)}>
+                        {userStory.description ? userStory.description : 'Add a description...'}
+                    </div>
+                )}
             </div>
             {isShowSubTask && (
                 <div className="box-border border-none mt-3">
@@ -245,31 +329,34 @@ function RightPanel({ item }) {
                     </svg>
                 </button>
                 <div id="details-content" aria-labelledby="details-header" class="space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <span class="w-24 font-semibold text-gray-900">Assignee</span>
+                    <div class="flex items-center gap-12">
+                        <span class="w-24 font-medium text-gray-600">Assignee</span>
                         <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-semibold">
+                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-medium">
                                 {getInitials(userAssignee.userName)}
                             </div>
                             <span>{userAssignee.userName}</span>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-24 font-semibold text-gray-900">Reporter</span>
+                    <div class="flex items-center gap-12">
+                        <span class="w-24 font-medium text-gray-600">Reporter</span>
                         <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-semibold">
+                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-medium">
                                 {getInitials(userReport.userName)}
                             </div>
                             <span>{userReport.userName}</span>
                         </div>
                     </div>
-                    <div class="flex flex-col space-y-2">
-                        <span class="w-24 font-semibold text-gray-900">Sprint</span>
-                        <div class="flex flex-col space-y-1 ml-24"></div>
+                    <div class="flex gap-12">
+                        <span class="w-24 font-medium text-gray-600">Sprint</span>
+                        <div class="">{sprint?.name}</div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                        <span class="w-24 font-semibold text-gray-900">Priority</span>
-                        <span class="text-gray-400"></span>
+                    <div class="flex  gap-12">
+                        <span class="w-24 font-medium text-gray-600">Priority</span>
+                        <div className="flex items-center gap-4">
+                            <span class="text-gray-400">{getPriorityIcon(priority[userStory.priorityId])}</span>
+                            <span class="text-gray-400">{priority[userStory.priorityId]}</span>
+                        </div>
                     </div>
                 </div>
             </section>
