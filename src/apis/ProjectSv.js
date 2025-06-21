@@ -286,6 +286,70 @@ export const getSprintById= (id) =>
             reject(error);
         }
     });
+export const getTaskByStoryId= (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/tasks/${id}/story`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getAllEpics= () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/epic`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getEpicById= (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/epic/${id}`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const getAllBug= () =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `bugs/bug/projects/${localStorage.getItem("projectId")}/bugs`,
+                method: 'get',
+                withCredentials: true,
+                headers: {
+                    "X-Project-Id" : localStorage.getItem("projectId")
+                }
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
 
 
 

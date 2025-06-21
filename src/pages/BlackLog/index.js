@@ -15,8 +15,12 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: String(id) });
     const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
     const [showStatus, setShowStatus] = useState(false);
+    const [showEdit, setShowEdit] = useState(false);
+    const [showEpic, setShowEpic] = useState(false);
     const [user, setUser] = useState([]);
     const [userAssignee, setUserAssignee] = useState({});
+    const [epics, setEpics] = useState([]);
+    const [epic, setEpic] = useState({});
     const dropdownRef = useRef(null);
     const [selectedStatusId, setSelectedStatusId] = useState(1);
     const firstItemRef = useRef(null);
@@ -28,6 +32,24 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
         { id: 3, title: 'IN REVIEW' },
         { id: 4, title: 'DONE' },
     ];
+
+    const epicRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (epicRef.current && !epicRef.current.contains(event.target)) {
+                setShowEpic(false);
+            }
+        }
+
+        if (showEpic) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showEpic]);
 
     useEffect(() => {
         if (showStatus && firstItemRef.current) {
@@ -62,6 +84,38 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             toast.error('An error occurred during sign up. Please try again.');
         }
     };
+    const GetEpicByProject = async () => {
+        try {
+            await apis
+                .getAllEpics()
+                .then((res) => {
+                    setEpics(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+    const GetEpicById = async (id) => {
+        console.log(id);
+        try {
+            await apis
+                .getEpicById(id)
+                .then((res) => {
+                    console.log(res);
+                    setEpic(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
     useEffect(() => {
         GetUserByProject();
     }, []);
@@ -70,7 +124,11 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
         if (item != undefined && item.assignedTo !== '') {
             getUser(item?.assignedTo);
         }
+        if (!!item && item.epicId !== null) {
+            GetEpicById(item.epicId);
+        }
         setSelectedStatusId(item.statusId);
+        GetEpicByProject();
     }, [item]);
 
     const getUser = (id) => {
@@ -158,6 +216,34 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
         PostData();
         setShowStatus(false);
     };
+    const handleSelectEpic = (epicId) => {
+        const PostData = async () => {
+            try {
+                const update = {
+                    epicId: epicId,
+                    sprintId: item?.sprintId,
+                    name: item?.name,
+                    description: item?.description,
+                    priorityId: item?.priorityId,
+                    assignedTo: item?.assignedTo,
+                    statusId: item?.statusId,
+                };
+                await apis
+                    .editUserStore(item?.storyId, update)
+                    .then((res) => {
+                        updateData(true);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowStatus(false);
+    };
 
     function getInitials(name = '') {
         if (!name) return '';
@@ -191,6 +277,22 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
 
     const isDraggingRef = useRef(false);
     const mouseMovedRef = useRef(false);
+    const statusRef = useRef(null);
+    useEffect(() => {
+    const handleClickOutside = (event) => {
+        if (statusRef.current && !statusRef.current.contains(event.target)) {
+            setShowStatus(false);
+        }
+    };
+
+    if (showStatus) {
+        document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+    };
+}, [showStatus]);
 
     useEffect(() => {
         const handleMouseMove = () => {
@@ -233,7 +335,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             ref={setNodeRef}
             {...attributes}
             style={style}
-            className="items-center hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
+            className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
         >
             <div
                 {...listeners}
@@ -251,8 +353,56 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         <span className="font-semibold">NHOM4-{index + 1}</span> {name}
                     </span>
                 </div>
-                <div className="flex items-center space-x-3">
-                    <div className="relative w-[110px] ">
+                <div className="flex relative items-center space-x-3">
+                    <div className="relative w-[50px]" ref={epicRef}>
+                        {!!item && epic.epicId === item.epicId ? (
+                            <div
+                                onClick={(e) => {
+                                    stopDrag(e);
+                                    setShowEpic((prev) => !prev);
+                                }}
+                                className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
+                                    epic.name,
+                                )}`}
+                            >
+                                <div className="text-purple-300">
+                                    <i className="fas fa-bolt"></i>
+                                </div>
+                                {epic.name}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={(e) => {
+                                    stopDrag(e);
+                                    setShowEpic((prev) => !prev);
+                                }}
+                                className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
+                            >
+                                + Epic
+                            </button>
+                        )}
+                        {showEpic && (
+                            <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                {epics.map((data, index) => (
+                                    <div
+                                        key={index}
+                                        ref={index === 0 ? firstItemRef : null}
+                                        tabIndex={-1}
+                                        onClick={() => handleSelectEpic(data.epicId)}
+                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <div className="text-purple-300">
+                                            <i className="fas fa-bolt"></i>
+                                        </div>
+                                        <div className="p-1 rounded-lg flex items-center text-lg font-bold">
+                                            {data.name}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <div className="relative w-[110px] " ref={statusRef}>
                         <button
                             onClick={(e) => {
                                 stopDrag(e);
@@ -307,7 +457,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             title={`Assignee: ${userAssignee?.userName}`}
                             className={`relative w-10 h-10 rounded-full  ${getColorFromName(
                                 userAssignee?.userName,
-                            )} hover:opacity-90 cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                            )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
                         >
                             {/* Avatar gồm nhiều chữ cái với màu riêng */}
                             {getInitialsElements(userAssignee?.userName)}
@@ -358,6 +508,17 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             )}
                         </div>
                     )}
+
+                    <div className="group w-[40px]">
+                        <button
+                            className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
+                            onClick={() => {
+                                setShowEdit((prev) => !prev);
+                            }}
+                        >
+                            <i className="fas fa-ellipsis-h text-gray-600"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -549,7 +710,7 @@ function BlackLog() {
             const [backlogRes, sprintRes] = await Promise.all([apis.getUserStore(), apis.getSprintByProject()]);
 
             const items = backlogRes.data.data;
-            const sprints = sprintRes.data.data;
+            const sprints = sprintRes?.data.data?.filter((item) => item.statusId < 3);
 
             setItems(items); // vẫn cập nhật state nếu bạn cần sau này
             setItemSprint(sprints);

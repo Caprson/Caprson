@@ -9,6 +9,7 @@ function ListWork() {
     const dropdownRef = useRef(null);
     const [dropUp, setDropUp] = useState(false);
     const [isCreating, setIsCreating] = useState();
+    const [dataAll, setDataAll] = useState([]);
     const today = new Date();
     const startDate = today.toISOString().split('T')[0]; // yyyy-mm-dd
 
@@ -98,19 +99,17 @@ function ListWork() {
         }
     };
 
-    
-
     const CreateListStore = async () => {
         if (userStore.name.trim() === '') return;
         try {
             const payload = selectedType.buildPayload(userStore.name);
             if (selectedType.name !== 'Bug') {
                 await apis
-                    .createUserStore(selectedType.type,payload)
+                    .createUserStore(selectedType.type, payload)
                     .then((res) => {
-                        console.log(res)
-                        SetUserStore({ ...userStore, name: '' })
-                        setIsCreating(false)
+                        console.log(res);
+                        SetUserStore({ ...userStore, name: '' });
+                        setIsCreating(false);
                     })
                     .catch((error) => {
                         console.error('Registration error: ', error);
@@ -132,6 +131,29 @@ function ListWork() {
             toast.error('Creation failed');
         }
     };
+
+    const GetAllTypeProject = async () => {
+        try {
+            const [storyRes, bugsRes, epicRes] = await Promise.all([
+                apis.getUserStore(),
+                apis.getAllBug(),
+                apis.getAllEpics(),
+            ]);
+
+            // Giả sử mỗi response trả về .data là một mảng
+            const allData = [...storyRes.data.data, ...bugsRes.data.data, ...epicRes.data.data];
+
+            console.log('Merged Data:', allData);
+            setDataAll(allData);
+        } catch (error) {
+            console.error('Failed to fetch data:', error);
+            return [];
+        }
+    };
+
+    useEffect(() => {
+        GetAllTypeProject();
+    }, []);
     // 👇 Detect click outside input
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -486,7 +508,7 @@ function ListWork() {
                             </tr>
                         </thead>
                         <tbody>
-                            {rows.map((data, index) => (
+                            {dataAll.map((data, index) => (
                                 <TableRow key={index} row={data} />
                             ))}
                         </tbody>
