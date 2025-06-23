@@ -69,6 +69,24 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, []);
+    const getTaskByStory = (id) => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .getTaskByStoryId(id)
+                    .then((res) => {
+                        setSubTask(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
     const GetUserByProject = async () => {
         try {
             await apis
@@ -279,20 +297,20 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const mouseMovedRef = useRef(false);
     const statusRef = useRef(null);
     useEffect(() => {
-    const handleClickOutside = (event) => {
-        if (statusRef.current && !statusRef.current.contains(event.target)) {
-            setShowStatus(false);
+        const handleClickOutside = (event) => {
+            if (statusRef.current && !statusRef.current.contains(event.target)) {
+                setShowStatus(false);
+            }
+        };
+
+        if (showStatus) {
+            document.addEventListener('mousedown', handleClickOutside);
         }
-    };
 
-    if (showStatus) {
-        document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-    };
-}, [showStatus]);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [showStatus]);
 
     useEffect(() => {
         const handleMouseMove = () => {

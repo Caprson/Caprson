@@ -74,6 +74,7 @@ function RightPanel({ item }) {
 
     useEffect(() => {
         getUserStoryById(item);
+        getTaskByStory(item)
     }, [item]);
 
     const GetUserByProject = async () => {

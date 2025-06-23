@@ -51,17 +51,15 @@ function ListWork() {
             name: 'Bug',
             icon: '🐞',
             buildPayload: (name) => ({
-                projectId: localStorage.getItem('projectId'),
+                projectId: localStorage.getItem("projectId"),
                 storyId: 1,
                 taskId: 1,
                 title: name,
                 description: '',
-                reportedBy: '',
                 assignedTo: '',
                 severityId: 1,
                 priorityId: 1,
                 statusId: 1,
-                createdBy: '',
             }),
         },
     ];
