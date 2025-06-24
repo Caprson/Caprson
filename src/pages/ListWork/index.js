@@ -51,7 +51,7 @@ function ListWork() {
             name: 'Bug',
             icon: '🐞',
             buildPayload: (name) => ({
-                projectId: localStorage.getItem("projectId"),
+                projectId: localStorage.getItem('projectId'),
                 storyId: 1,
                 taskId: 1,
                 title: name,
@@ -474,43 +474,48 @@ function ListWork() {
             </div>
 
             {/* Table */}
-            <div className="border overflow-x-hidden overflow-y-hidden border-gray-300  rounded-xl ">
-                <div className="overflow-x-auto overflow-y-auto max-h-[450px] shadow">
-                    <table className="min-w-[900px] w-full border-collapse text-2xl text-gray-700">
-                        <thead className="bg-gray-100 sticky top-0 z-10">
-                            <tr>
-                                <th className="w-12 p-4 border-b border-r border-gray-300 text-center">
-                                    <input
-                                        type="checkbox"
-                                        aria-label="Select all"
-                                        className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                    />
-                                </th>
-                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-center">
-                                    Type
-                                </th>
-                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">Key</th>
-                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
-                                    Summary
-                                </th>
-                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
-                                    Status
-                                </th>
-                                <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
-                                    Comments
-                                </th>
-                                <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
-                                    Sprint
-                                </th>
-                                <th className="w-12 p-3 border-b border-gray-300" />
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {dataAll.map((data, index) => (
-                                <TableRow key={index} row={data} />
-                            ))}
-                        </tbody>
-                    </table>
+
+            <div className="border border-gray-300  rounded-xl ">
+                <div className=" overflow-x-hidden overflow-y-hidden  ">
+                    <div className="overflow-x-auto overflow-y-auto max-h-[450px] shadow">
+                        <table className="min-w-[900px] w-full border-collapse text-2xl text-gray-700">
+                            <thead className="bg-gray-100 sticky top-0 z-10">
+                                <tr>
+                                    <th className="w-12 p-4 border-b border-r border-gray-300 text-center">
+                                        <input
+                                            type="checkbox"
+                                            aria-label="Select all"
+                                            className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                        />
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-300 font-semibold text-center">
+                                        Type
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                        Key
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                        Summary
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                        Status
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-300 font-semibold text-left">
+                                        Comments
+                                    </th>
+                                    <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
+                                        Sprint
+                                    </th>
+                                    <th className="w-12 p-3 border-b border-gray-300" />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {dataAll.map((data, index) => (
+                                    <TableRow key={index} row={data} />
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 {isCreating ? (
                     <div

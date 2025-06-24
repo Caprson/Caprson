@@ -14,6 +14,13 @@ export default function CreateProject() {
         endDate: '',
         statusId: 1,
     });
+    const status = {
+        1:"Not Started",
+        2:"In Progress",
+        3:"Completed",
+        4:"On Hold",
+        5:""
+    }
 
     const handleChange = (e) => {
         setProject({ ...project, [e.target.name]: e.target.value });
