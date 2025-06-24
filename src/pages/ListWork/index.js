@@ -10,6 +10,9 @@ function ListWork() {
     const [dropUp, setDropUp] = useState(false);
     const [isCreating, setIsCreating] = useState();
     const [dataAll, setDataAll] = useState([]);
+    const [isUpdate, setIsUpdate] = useState(false);
+    const [selectedUserId, setSelectedUserId] = useState([]);
+    const [users, setUsers] = useState([]);
     const today = new Date();
     const startDate = today.toISOString().split('T')[0]; // yyyy-mm-dd
 
@@ -69,12 +72,6 @@ function ListWork() {
     const [userStore, SetUserStore] = useState({
         name: '',
     });
-    const users = [
-        { id: 1, initials: 'H', color: 'bg-orange-500', name: 'hongson31202' },
-        { id: 2, initials: 'H', color: 'bg-orange-400', name: 'hongson31202' },
-        { id: 3, initials: 'D', color: 'bg-orange-500', name: 'duongtuanhd97' },
-        { id: 4, initials: 'LD', color: 'bg-cyan-700', name: 'Lê Chung Dũng' },
-    ];
 
     useEffect(() => {
         if (dropdownOpen && dropdownRef.current) {
@@ -137,9 +134,20 @@ function ListWork() {
                 apis.getAllBug(),
                 apis.getAllEpics(),
             ]);
-
+            const assignedstoryRes =
+                selectedUserId.length === 0
+                    ? storyRes.data.data
+                    : storyRes.data.data.filter((item) => selectedUserId.includes(item.assignedTo));
+            const assignedbugsRes =
+                selectedUserId.length === 0
+                    ? bugsRes.data.data
+                    : bugsRes.data.data.filter((item) => selectedUserId.includes(item.assignedTo));
+            const assignedepicRes =
+                selectedUserId.length === 0
+                    ? epicRes.data.data
+                    : epicRes.data.data.filter((item) => selectedUserId.includes(item.assignedTo));
             // Giả sử mỗi response trả về .data là một mảng
-            const allData = [...storyRes.data.data, ...bugsRes.data.data, ...epicRes.data.data];
+            const allData = [...assignedstoryRes, ...assignedbugsRes, ...assignedepicRes];
 
             console.log('Merged Data:', allData);
             setDataAll(allData);
@@ -149,9 +157,33 @@ function ListWork() {
         }
     };
 
+    const GetUserByProject = async () => {
+        try {
+            await apis
+                .getUseByProject()
+                .then((res) => {
+                    setUsers(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+
     useEffect(() => {
         GetAllTypeProject();
+        GetUserByProject();
     }, []);
+
+    useEffect(() => {
+        if (isUpdate) {
+            setIsUpdate(false);
+            GetAllTypeProject();
+        }
+    }, [isUpdate]);
     // 👇 Detect click outside input
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -409,7 +441,7 @@ function ListWork() {
                             <i className="fas fa-search"></i>
                         </span>
                     </div>
-                    <UserCircles />
+                    <UserCircles user={users} idSelelct={selectedUserId} selectUser={setSelectedUserId} update={setIsUpdate} />
                     <button
                         className="border border-gray-300 rounded px-3 py-2 text-xl font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
                         aria-haspopup="true"

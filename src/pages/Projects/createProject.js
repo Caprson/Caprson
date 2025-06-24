@@ -19,7 +19,7 @@ export default function CreateProject() {
         2:"In Progress",
         3:"Completed",
         4:"On Hold",
-        5:""
+        5:"Cancelled"
     }
 
     const handleChange = (e) => {
@@ -191,15 +191,16 @@ export default function CreateProject() {
                             <label className="block text-xl font-semibold mb-1" htmlFor="project-name">
                                 Status <span className="text-red-600">*</span>
                             </label>
-                            <input
-                                id="project-name"
-                                type="number"
-                                min={0}
-                                name="statusId"
-                                onChange={handleChange}
-                                placeholder="Try a team name, project goal, milestone..."
-                                className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                            />
+                            <select
+                            name='statusId'
+                            onChange={handleChange}
+                            className=' className="w-full border border-solid border-gray-300 text-lg rounded-md px-3 py-2 text-gray-700 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent'>
+                                <option value={1}>{status[1]}</option>
+                                <option value={2}>{status[2]}</option>
+                                <option value={3}>{status[3]}</option>
+                                <option value={4}>{status[4]}</option>
+                                <option value={5}>{status[5]}</option>
+                            </select>
                         </div>
                         <div>
                             <label className="block text-xl font-semibold mb-1" htmlFor="project-name">
@@ -216,6 +217,7 @@ export default function CreateProject() {
                         </div>
                         <div className="flex gap-4 mt-6">
                             <button
+                                onClick={()=> navigate('/projects')}
                                 type="button"
                                 className="px-4 py-2 border border-solid border-gray-300 rounded-md text-gray-900 font-normal hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1"
                             >

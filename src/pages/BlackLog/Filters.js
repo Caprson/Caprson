@@ -28,6 +28,7 @@ function Filters({ user,idSelelct, selectUser, update }) {
                 {user?.map((data, index) => (
                     <div
                         key={index}
+                        title={data.userName}
                         onClick={() => handleToggleUser(data.userId)}
                         className={`w-12 h-12 rounded-full flex p-1 items-center justify-center cursor-pointer
                             ${idSelelct.includes(data.userId) ? 'border-2 border-blue-500' : ''}`}
@@ -43,6 +44,7 @@ function Filters({ user,idSelelct, selectUser, update }) {
                 ))}
                 <div
                     aria-label="User icon"
+                    title="UnAssignee"
                     onClick={() => handleToggleUser('')}
                     class={`w-12 h-12 rounded-full p-1 flex items-center justify-center cursor-pointer ${idSelelct.includes('') ? 'border-2 border-blue-500' : ''}`}
                 >
