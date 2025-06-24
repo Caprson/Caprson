@@ -27,6 +27,12 @@ function RightPanel({ item }) {
         3: 'High',
         4: 'Highest',
     };
+        const status = [
+        { id: 1, title: 'TO DO' },
+        { id: 2, title: 'IN PROGRESS' },
+        { id: 3, title: 'IN REVIEW' },
+        { id: 4, title: 'DONE' },
+    ];
     const handleSubmid = async () => {
         const task = {
             storyId: userStory.storyId,
@@ -161,7 +167,6 @@ function RightPanel({ item }) {
         return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
     }
 
-    console.log(priority[userReport.priorityId]);
     function getPriorityIcon(priority) {
         switch (priority) {
             case 'Highest':
@@ -206,6 +211,7 @@ function RightPanel({ item }) {
             toast.error('An error occurred during sign up. Please try again.');
         }
     };
+
     const handleSave = () => {};
     return (
         <div class="flex flex-col w-2/5 border-l border-gray-200 overflow-y-auto p-6 space-y-6">
@@ -295,14 +301,13 @@ function RightPanel({ item }) {
                             <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Key</th>
                             <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Summary</th>
                             <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Status</th>
-                            <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Comments</th>
                             <th className="p-3 border-b border-r border-gray-200 text-sm text-left">Sprint</th>
                             <th className="w-12 p-3 border-b border-gray-300" />
                         </tr>
                     </thead>
                     <tbody>
                         
-                        {/* {rows.map((data, index) => (
+                         { subTask.map((data, index) => (
                             <tr key={index} className="group hover:bg-neutral-100 h-[40px]">
                                 
                                 <td className="relative w-[110px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
@@ -323,29 +328,24 @@ function RightPanel({ item }) {
                                     </div>
                                 </td>
                                 <td className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                    {data.key}
+                                    <i class="fa-solid fa-diagram-subtask" style="color: #30c9e8;"></i>
                                 </td>
                                 <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                    {data.summary}
+                                    {data.name}
                                 </td>
                                 <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
-                                    <span className="inline-block bg-gray-400 text-gray-900 font-semibold text-lg  rounded">
-                                        {data.status}
+                                    <span className="inline-block bg-gray-300 text-gray-900 font-semibold text-lg  rounded">
+                                        {status[data.statusId]}
                                     </span>
                                 </td>
-                                <td className="px-4 w-[145px]  overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500">
-                                    <i className="far fa-comment-alt text-lg" /> Add comment
-                                </td>
-                                <td className="px-4 w-[145px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
-                                    {data.sprint}
-                                </td>
+                               
                                 <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                                     <div className="w-8 h-8 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-xs font-semibold text-white">
-                                        {data.Assignee}
+                                       
                                     </div>
                                 </td>
                             </tr>
-                        ))} */}
+                        ))} 
                     </tbody>
                 </table>
             </div>

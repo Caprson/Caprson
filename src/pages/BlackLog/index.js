@@ -355,210 +355,411 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
 
     const containerRef = useRef(null);
     return (
-        <div
-            ref={setNodeRef}
-            {...attributes}
-            style={style}
-            className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
-        >
+        <>
             <div
-                {...listeners}
-                ref={containerRef}
-                className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "
-            ></div>
-            <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
-                <div className="flex items-center space-x-3">
-                    <div className=" relative items-center">
-                        <i className="fas fa-chevron-down text-gray-600"></i>
+                ref={setNodeRef}
+                {...attributes}
+                style={style}
+                className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
+            >
+                <div
+                    {...listeners}
+                    ref={containerRef}
+                    className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "
+                ></div>
+                <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
+                    <div className="flex items-center space-x-3">
+                        <div className=" relative items-center">
+                            <i className="fas fa-chevron-down text-gray-600"></i>
+                        </div>
+                        <input
+                            type="checkbox"
+                            className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                            onClick={stopDrag}
+                        />
+                        <span className="text-xl text-gray-900">
+                            <span className="font-semibold">NHOM4-{index + 1}</span> {name}
+                        </span>
                     </div>
-                    <input
-                        type="checkbox"
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                        onClick={stopDrag}
-                    />
-                    <span className="text-xl text-gray-900">
-                        <span className="font-semibold">NHOM4-{index + 1}</span> {name}
-                    </span>
-                </div>
-                <div className="flex relative items-center space-x-3">
-                    <div className="relative w-[50px]" ref={epicRef}>
-                        {!!item && epic.epicId === item.epicId ? (
-                            <div
-                                onClick={(e) => {
-                                    stopDrag(e);
-                                    setShowEpic((prev) => !prev);
-                                }}
-                                className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
-                                    epic.name,
-                                )}`}
-                            >
-                                <div className="text-purple-300">
-                                    <i className="fas fa-bolt"></i>
+                    <div className="flex relative items-center space-x-3">
+                        <div className="relative w-[50px]" ref={epicRef}>
+                            {!!item && epic.epicId === item.epicId ? (
+                                <div
+                                    onClick={(e) => {
+                                        stopDrag(e);
+                                        setShowEpic((prev) => !prev);
+                                    }}
+                                    className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
+                                        epic.name,
+                                    )}`}
+                                >
+                                    <div className="text-purple-300">
+                                        <i className="fas fa-bolt"></i>
+                                    </div>
+                                    {epic.name}
                                 </div>
-                                {epic.name}
-                            </div>
-                        ) : (
+                            ) : (
+                                <button
+                                    onClick={(e) => {
+                                        stopDrag(e);
+                                        setShowEpic((prev) => !prev);
+                                    }}
+                                    className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
+                                >
+                                    + Epic
+                                </button>
+                            )}
+                            {showEpic && (
+                                <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                    {epics.map((data, index) => (
+                                        <div
+                                            key={index}
+                                            ref={index === 0 ? firstItemRef : null}
+                                            tabIndex={-1}
+                                            onClick={() => handleSelectEpic(data.epicId)}
+                                            className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            <div className="text-purple-300">
+                                                <i className="fas fa-bolt"></i>
+                                            </div>
+                                            <div className="p-1 rounded-lg flex items-center text-lg font-bold">
+                                                {data.name}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                        <div className="relative w-[110px] " ref={statusRef}>
                             <button
                                 onClick={(e) => {
                                     stopDrag(e);
-                                    setShowEpic((prev) => !prev);
+                                    setShowStatus((prev) => !prev);
                                 }}
-                                className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
+                                className={`flex items-center justify-center text-gray-700 font-semibold text-white text-sm min-w-[70px] rounded p-2 ${getColorFromStatus(
+                                    status.find((st) => st.id === item.statusId).title,
+                                )}`}
                             >
-                                + Epic
+                                {item && status.find((st) => st.id === item.statusId).title}
                             </button>
+                            {!!item && showStatus && (
+                                <div className="absolute top-10 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                    {status
+                                        .filter((data) => data.id !== selectedStatusId)
+                                        .map((data, index) => (
+                                            <div
+                                                key={data.id}
+                                                ref={index === 0 ? firstItemRef : null}
+                                                tabIndex={-1} // cần thiết để .focus() hoạt động
+                                                onClick={() => {
+                                                    handleStatusSelect(data.id);
+                                                }}
+                                                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                <div
+                                                    className={`p-2 rounded-lg ${getColorFromStatus(
+                                                        data.title,
+                                                    )} flex items-center justify-center text-sm font-bold text-white min-w-[110px]`}
+                                                >
+                                                    {data.title}
+                                                </div>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
+                        <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
+                            -
+                        </button>
+                        <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
+                            =
+                        </button>
+
+                        {item != undefined && !!item.assignedTo ? (
+                            <div
+                                ref={dropdownRef}
+                                onClick={(e) => {
+                                    stopDrag(e);
+                                    setShowAssigneeSelect((prev) => !prev);
+                                }}
+                                title={`Assignee: ${userAssignee?.userName}`}
+                                className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                    userAssignee?.userName,
+                                )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                            >
+                                {/* Avatar gồm nhiều chữ cái với màu riêng */}
+                                {getInitialsElements(userAssignee?.userName)}
+
+                                {showAssigneeSelect && (
+                                    <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                        <div
+                                            onClick={() => handleUserSelect(null)}
+                                            className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                        >
+                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
+                                                <i className="fas fa-user"></i>
+                                            </div>
+                                            <span className="text-gray-700">Un Assignee</span>
+                                        </div>
+                                        {user.map((data) => (
+                                            <div
+                                                key={data.userId}
+                                                onClick={() => handleUserSelect(data.userId)}
+                                                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                    {getInitials(data.userName)}
+                                                </div>
+                                                <span className="text-gray-700">{data.userName}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div
+                                ref={dropdownRef}
+                                onClick={(e) => {
+                                    stopDrag(e);
+                                    setShowAssigneeSelect((prev) => !prev);
+                                }}
+                                title="Click to assign user"
+                                className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
+                            >
+                                <i className="fas fa-user"></i>
+
+                                {showAssigneeSelect && (
+                                    <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                        {user.map((data) => (
+                                            <li
+                                                key={data.userId}
+                                                onClick={() => handleUserSelect(data.userId)}
+                                                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                    {getInitials(data.userName)}
+                                                </div>
+                                                <span className="text-gray-700 font-bold">{data.userName}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         )}
-                        {showEpic && (
-                            <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                {epics.map((data, index) => (
+
+                        <div className="group w-[40px]">
+                            <button
+                                className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
+                                onClick={() => {
+                                    setShowEdit((prev) => !prev);
+                                }}
+                            >
+                                <i className="fas fa-ellipsis-h text-gray-600"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {subTask.length > 0 ?? subTask.map((data,index)=>
+            <div
+                key={index}
+                    className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
+                >
+                    <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
+                        <div className="flex items-center space-x-3">
+                            <div className=" relative items-center">
+                                <i className="fas fa-chevron-down text-gray-600"></i>
+                            </div>
+                            <input
+                                type="checkbox"
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded"
+                                onClick={stopDrag}
+                            />
+                            <span className="text-xl text-gray-900">
+                                <span className="font-semibold">NHOM4-{index + 1}</span> { data.name}
+                            </span>
+                        </div>
+                        <div className="flex relative items-center space-x-3">
+                            <div className="relative w-[50px]" ref={epicRef}>
+                                {!!item && epic.epicId === data.epicId ? (
                                     <div
-                                        key={index}
-                                        ref={index === 0 ? firstItemRef : null}
-                                        tabIndex={-1}
-                                        onClick={() => handleSelectEpic(data.epicId)}
-                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                        onClick={(e) => {
+                                            stopDrag(e);
+                                            setShowEpic((prev) => !prev);
+                                        }}
+                                        className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
+                                            epic.name,
+                                        )}`}
                                     >
                                         <div className="text-purple-300">
                                             <i className="fas fa-bolt"></i>
                                         </div>
-                                        <div className="p-1 rounded-lg flex items-center text-lg font-bold">
-                                            {data.name}
-                                        </div>
+                                        {epic.name}
                                     </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                    <div className="relative w-[110px] " ref={statusRef}>
-                        <button
-                            onClick={(e) => {
-                                stopDrag(e);
-                                setShowStatus((prev) => !prev);
-                            }}
-                            className={`flex items-center justify-center text-gray-700 font-semibold text-white text-sm min-w-[70px] rounded p-2 ${getColorFromStatus(
-                                status.find((st) => st.id === item.statusId).title,
-                            )}`}
-                        >
-                            {item && status.find((st) => st.id === item.statusId).title}
-                        </button>
-                        {!!item && showStatus && (
-                            <div className="absolute top-10 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                {status
-                                    .filter((data) => data.id !== selectedStatusId)
-                                    .map((data, index) => (
-                                        <div
-                                            key={data.id}
-                                            ref={index === 0 ? firstItemRef : null}
-                                            tabIndex={-1} // cần thiết để .focus() hoạt động
-                                            onClick={() => {
-                                                handleStatusSelect(data.id);
-                                            }}
-                                            className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <div
-                                                className={`p-2 rounded-lg ${getColorFromStatus(
-                                                    data.title,
-                                                )} flex items-center justify-center text-sm font-bold text-white min-w-[110px]`}
-                                            >
-                                                {data.title}
-                                            </div>
-                                        </div>
-                                    ))}
-                            </div>
-                        )}
-                    </div>
-                    <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
-                        -
-                    </button>
-                    <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
-                        =
-                    </button>
-
-                    {item != undefined && !!item.assignedTo ? (
-                        <div
-                            ref={dropdownRef}
-                            onClick={(e) => {
-                                stopDrag(e);
-                                setShowAssigneeSelect((prev) => !prev);
-                            }}
-                            title={`Assignee: ${userAssignee?.userName}`}
-                            className={`relative w-10 h-10 rounded-full  ${getColorFromName(
-                                userAssignee?.userName,
-                            )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
-                        >
-                            {/* Avatar gồm nhiều chữ cái với màu riêng */}
-                            {getInitialsElements(userAssignee?.userName)}
-
-                            {showAssigneeSelect && (
-                                <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
-                                    <div
-                                        onClick={() => handleUserSelect(null)}
-                                        className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                ) : (
+                                    <button
+                                        onClick={(e) => {
+                                            stopDrag(e);
+                                            setShowEpic((prev) => !prev);
+                                        }}
+                                        className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
                                     >
-                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
-                                            <i className="fas fa-user"></i>
-                                        </div>
-                                        <span className="text-gray-700">Un Assignee</span>
-                                    </div>
-                                    {user.map((data) => (
-                                        <div
-                                            key={data.userId}
-                                            onClick={() => handleUserSelect(data.userId)}
-                                            className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                {getInitials(data.userName)}
+                                        + Epic
+                                    </button>
+                                )}
+                                {showEpic && (
+                                    <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                        {epics.map((data, index) => (
+                                            <div
+                                                key={index}
+                                                ref={index === 0 ? firstItemRef : null}
+                                                tabIndex={-1}
+                                                onClick={() => handleSelectEpic(data.epicId)}
+                                                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                            >
+                                                <div className="text-purple-300">
+                                                    <i className="fas fa-bolt"></i>
+                                                </div>
+                                                <div className="p-1 rounded-lg flex items-center text-lg font-bold">
+                                                    {data.name}
+                                                </div>
                                             </div>
-                                            <span className="text-gray-700">{data.userName}</span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="relative w-[110px] " ref={statusRef}>
+                                <button
+                                    onClick={(e) => {
+                                        stopDrag(e);
+                                        setShowStatus((prev) => !prev);
+                                    }}
+                                    className={`flex items-center justify-center text-gray-700 font-semibold text-white text-sm min-w-[70px] rounded p-2 ${getColorFromStatus(
+                                        status.find((st) => st.id === data.statusId).title,
+                                    )}`}
+                                >
+                                    {data && status.find((st) => st.id === data.statusId).title}
+                                </button>
+                                {!!data && showStatus && (
+                                    <div className="absolute top-10 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                        {status
+                                            .filter((data) => data.id !== selectedStatusId)
+                                            .map((data, index) => (
+                                                <div
+                                                    key={data.id}
+                                                    ref={index === 0 ? firstItemRef : null}
+                                                    tabIndex={-1} // cần thiết để .focus() hoạt động
+                                                    onClick={() => {
+                                                        handleStatusSelect(data.id);
+                                                    }}
+                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    <div
+                                                        className={`p-2 rounded-lg ${getColorFromStatus(
+                                                            data.title,
+                                                        )} flex items-center justify-center text-sm font-bold text-white min-w-[110px]`}
+                                                    >
+                                                        {data.title}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                    </div>
+                                )}
+                            </div>
+                            <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
+                                -
+                            </button>
+                            <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
+                                =
+                            </button>
+
+                            {item != undefined && !!item.assignedTo ? (
+                                <div
+                                    ref={dropdownRef}
+                                    onClick={(e) => {
+                                        stopDrag(e);
+                                        setShowAssigneeSelect((prev) => !prev);
+                                    }}
+                                    title={`Assignee: ${userAssignee?.userName}`}
+                                    className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                        userAssignee?.userName,
+                                    )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                                >
+                                    {/* Avatar gồm nhiều chữ cái với màu riêng */}
+                                    {getInitialsElements(userAssignee?.userName)}
+
+                                    {showAssigneeSelect && (
+                                        <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                            <div
+                                                onClick={() => handleUserSelect(null)}
+                                                className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                            >
+                                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
+                                                    <i className="fas fa-user"></i>
+                                                </div>
+                                                <span className="text-gray-700">Un Assignee</span>
+                                            </div>
+                                            {user.map((data) => (
+                                                <div
+                                                    key={data.userId}
+                                                    onClick={() => handleUserSelect(data.userId)}
+                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                        {getInitials(data.userName)}
+                                                    </div>
+                                                    <span className="text-gray-700">{data.userName}</span>
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
+                                    )}
+                                </div>
+                            ) : (
+                                <div
+                                    ref={dropdownRef}
+                                    onClick={(e) => {
+                                        stopDrag(e);
+                                        setShowAssigneeSelect((prev) => !prev);
+                                    }}
+                                    title="Click to assign user"
+                                    className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
+                                >
+                                    <i className="fas fa-user"></i>
+
+                                    {showAssigneeSelect && (
+                                        <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                            {user.map((data) => (
+                                                <li
+                                                    key={data.userId}
+                                                    onClick={() => handleUserSelect(data.userId)}
+                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                        {getInitials(data.userName)}
+                                                    </div>
+                                                    <span className="text-gray-700 font-bold">{data.userName}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <div
-                            ref={dropdownRef}
-                            onClick={(e) => {
-                                stopDrag(e);
-                                setShowAssigneeSelect((prev) => !prev);
-                            }}
-                            title="Click to assign user"
-                            className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
-                        >
-                            <i className="fas fa-user"></i>
 
-                            {showAssigneeSelect && (
-                                <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                    {user.map((data) => (
-                                        <li
-                                            key={data.userId}
-                                            onClick={() => handleUserSelect(data.userId)}
-                                            className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                {getInitials(data.userName)}
-                                            </div>
-                                            <span className="text-gray-700 font-bold">{data.userName}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
+                            <div className="group w-[40px]">
+                                <button
+                                    className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
+                                    onClick={() => {
+                                        setShowEdit((prev) => !prev);
+                                    }}
+                                >
+                                    <i className="fas fa-ellipsis-h text-gray-600"></i>
+                                </button>
+                            </div>
                         </div>
-                    )}
-
-                    <div className="group w-[40px]">
-                        <button
-                            className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
-                            onClick={() => {
-                                setShowEdit((prev) => !prev);
-                            }}
-                        >
-                            <i className="fas fa-ellipsis-h text-gray-600"></i>
-                        </button>
                     </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 }
 

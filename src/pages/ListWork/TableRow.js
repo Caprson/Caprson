@@ -40,7 +40,7 @@ function TableRow({ row }) {
                 {row.storyId || row.epicId}
             </td>
             <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                {row.name}
+                {row.name || row.title}
             </td>
             <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
                 <span className="inline-block bg-gray-400 text-gray-900 font-semibold text-lg  rounded">
