@@ -21,6 +21,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const [userAssignee, setUserAssignee] = useState({});
     const [epics, setEpics] = useState([]);
     const [epic, setEpic] = useState({});
+    const [subTask, setSubTask] = useState([]);
     const dropdownRef = useRef(null);
     const [selectedStatusId, setSelectedStatusId] = useState(1);
     const firstItemRef = useRef(null);
@@ -75,6 +76,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                 await apis
                     .getTaskByStoryId(id)
                     .then((res) => {
+                        console.log(res);
                         setSubTask(res.data.data);
                     })
                     .catch((error) => {
@@ -123,7 +125,6 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             await apis
                 .getEpicById(id)
                 .then((res) => {
-                    console.log(res);
                     setEpic(res.data.data);
                 })
                 .catch((error) => {
@@ -136,6 +137,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     };
     useEffect(() => {
         GetUserByProject();
+        GetEpicByProject();
     }, []);
 
     useEffect(() => {
@@ -146,7 +148,9 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             GetEpicById(item.epicId);
         }
         setSelectedStatusId(item.statusId);
-        GetEpicByProject();
+        if (!!item) {
+            getTaskByStory(item.storyId);
+        }
     }, [item]);
 
     const getUser = (id) => {
@@ -175,6 +179,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const stopDrag = (e) => e.stopPropagation();
 
     const handleUserSelect = (userId) => {
+        console.log(userId);
         const PostData = async () => {
             try {
                 const update = {
@@ -190,7 +195,8 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                 await apis
                     .editUserStore(item?.storyId, update)
                     .then((res) => {
-                        getUser(update?.assignedTo);
+                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+
                         GetUserByProject();
                         updateData(true);
                         setShowAssigneeSelect(false);
@@ -362,6 +368,9 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             ></div>
             <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
                 <div className="flex items-center space-x-3">
+                    <div className=" relative items-center">
+                        <i className="fas fa-chevron-down text-gray-600"></i>
+                    </div>
                     <input
                         type="checkbox"
                         className="w-4 h-4 text-blue-600 border-gray-300 rounded"
@@ -465,7 +474,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         =
                     </button>
 
-                    {item != undefined && item.assignedTo ? (
+                    {item != undefined && !!item.assignedTo ? (
                         <div
                             ref={dropdownRef}
                             onClick={(e) => {
@@ -482,13 +491,22 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
 
                             {showAssigneeSelect && (
                                 <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                    <div
+                                        onClick={() => handleUserSelect(null)}
+                                        className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                    >
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
+                                            <i className="fas fa-user"></i>
+                                        </div>
+                                        <span className="text-gray-700">Un Assignee</span>
+                                    </div>
                                     {user.map((data) => (
                                         <div
                                             key={data.userId}
                                             onClick={() => handleUserSelect(data.userId)}
                                             className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
                                         >
-                                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
                                                 {getInitials(data.userName)}
                                             </div>
                                             <span className="text-gray-700">{data.userName}</span>
@@ -499,6 +517,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         </div>
                     ) : (
                         <div
+                            ref={dropdownRef}
                             onClick={(e) => {
                                 stopDrag(e);
                                 setShowAssigneeSelect((prev) => !prev);
@@ -509,17 +528,17 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             <i className="fas fa-user"></i>
 
                             {showAssigneeSelect && (
-                                <ul className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
                                     {user.map((data) => (
                                         <li
                                             key={data.userId}
                                             onClick={() => handleUserSelect(data.userId)}
                                             className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
                                         >
-                                            <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
                                                 {getInitials(data.userName)}
                                             </div>
-                                            <span className="text-gray-700">{data.userName}</span>
+                                            <span className="text-gray-700 font-bold">{data.userName}</span>
                                         </li>
                                     ))}
                                 </ul>
@@ -652,6 +671,8 @@ function BlackLog() {
     const [activeId, setActiveId] = useState(null);
     const [isUpdate, setIsUpdate] = useState(false);
     const [columns, setColumns] = useState({});
+    const [users, setUsers] = useState([]);
+    const [selectedUserId, setSelectedUserId] = useState([]);
     const [detail, setDetail] = useState({});
     const { isShowPopup, isShowRightPanel } = useSelector((state) => state.app);
     const dispatch = useDispatch();
@@ -729,21 +750,22 @@ function BlackLog() {
 
             const items = backlogRes.data.data;
             const sprints = sprintRes?.data.data?.filter((item) => item.statusId < 3);
-
+            // ⚠️ Filter theo assigned user
+            const assignedItems =
+                selectedUserId.length === 0 ? items : items.filter((item) => selectedUserId.includes(item.assignedTo));
             setItems(items); // vẫn cập nhật state nếu bạn cần sau này
-            setItemSprint(sprints);
 
             const newColumns = {
-                backlog: items.filter((item) => !item.sprintId),
+                backlog: assignedItems.filter((item) => !item.sprintId),
             };
 
             sprints.forEach((sprint) => {
-                const sprintItems = items.filter((item) => item.sprintId === sprint.sprintId);
+                const sprintItems = assignedItems.filter((item) => item.sprintId === sprint.sprintId);
                 if (sprint.sprintId) {
                     newColumns[sprint.sprintId] = sprintItems; // loại null/undefined
                 }
             });
-
+            setItemSprint(sprints);
             setColumns(newColumns);
         } catch (error) {
             console.error('Error fetching backlog or sprints:', error);
@@ -769,6 +791,7 @@ function BlackLog() {
 
     useEffect(() => {
         GetAllData();
+        GetUserByProject();
     }, []);
 
     useEffect(() => {
@@ -860,9 +883,24 @@ function BlackLog() {
             [overId]: [...columns[overId], item],
         });
     };
+    const GetUserByProject = async () => {
+        try {
+            await apis
+                .getUseByProject()
+                .then((res) => {
+                    setUsers(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
     return (
         <div className="h-full p-4 space-y-6">
-            <Filters />
+            <Filters user={users} idSelelct={selectedUserId} selectUser={setSelectedUserId} update={setIsUpdate} />
 
             <div className="flex h-full w-full">
                 <div className="w-full h-full">
