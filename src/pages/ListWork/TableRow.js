@@ -1,5 +1,10 @@
 import Assignee from './Assignee';
+import * as apis from '../../apis';
+import { toast } from 'react-toastify';
+import { useEffect, useState } from 'react';
+
 function TableRow({ row }) {
+    const [userAssignee, setUserAssignee] = useState({});
     const status = {
         1: 'TO DO',
         2: 'IN PROGRESS',
@@ -9,6 +14,34 @@ function TableRow({ row }) {
     const handleCreateChild = (parentTask) => {
         // Gọi form tạo task với parentId = parentTask.storyId (hoặc id gì đó)
     };
+    const getUser = (id) => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .getUseById(id)
+                    .then((res) => {
+                        setUserAssignee(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
+    useEffect(() => {
+        if (!!row.assignedTo || row.assignedTo !== '') getUser(row.assignedTo);
+    }, [row]);
+    function getInitials(name = '') {
+        if (!name) return '';
+        const words = name.trim().split(' ');
+        if (words.length === 1) return words[0][0].toUpperCase();
+        return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+    }
+    console.log(row.assignedTo);
     return (
         <tr className="group hover:bg-neutral-100 h-[40px]">
             <td className="p-4 border-b border-r border-gray-300 text-center">
@@ -54,9 +87,18 @@ function TableRow({ row }) {
                 {!!row.sprintId && row.sprintId}
             </td>
             <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                <div className="w-8 h-8 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-xs font-semibold text-white">
-                    {!!row.assignedTo && row.assignedTo !== '' ? row.assignedTo : <></>}
-                </div>
+                {!!row.assignedTo && row.assignedTo !== '' ? (
+                    <div className='flex gap-3 items-center'>
+                        <div className="w-10 h-10 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-sm font-semibold text-white">
+                        {getInitials(userAssignee.userName)}
+                    </div>
+                        <span className='font-semibold text-lg text-gray-600'>{userAssignee.email}</span>
+                    </div>
+                ) : (
+                    <div className="w-10 h-10  rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center">
+                         <i className="fas fa-user"></i>
+                    </div>
+                )}
             </td>
         </tr>
     );

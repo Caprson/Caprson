@@ -10,18 +10,24 @@ import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
 import RightPanel from './RightPanel';
 import useUserStoryEvents from '../../websocket/useUserStoryEvents';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDiagramSuccessor } from '@fortawesome/free-solid-svg-icons';
+import { FaChevronUp, FaChevronDown, FaEquals } from 'react-icons/fa';
 
 function DraggableTask({ id, index, name, item, updateData, detail }) {
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: String(id) });
     const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
     const [showStatus, setShowStatus] = useState(false);
     const [showEdit, setShowEdit] = useState(false);
+    const [showDeleteTask, setShowDeleteTask] = useState(false);
+    const [showDeleteTaskId, setShowDeleteTaskId] = useState(null);
     const [showEpic, setShowEpic] = useState(false);
     const [user, setUser] = useState([]);
     const [userAssignee, setUserAssignee] = useState({});
     const [epics, setEpics] = useState([]);
     const [epic, setEpic] = useState({});
     const [subTask, setSubTask] = useState([]);
+    const [showSubTasks, setShowSubTasks] = useState(false);
     const dropdownRef = useRef(null);
     const [selectedStatusId, setSelectedStatusId] = useState(1);
     const firstItemRef = useRef(null);
@@ -33,6 +39,81 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
         { id: 3, title: 'IN REVIEW' },
         { id: 4, title: 'DONE' },
     ];
+
+    const priority = {
+        1: 'Low',
+        2: 'Medium',
+        3: 'High',
+        4: 'Highest',
+    };
+    function getPriorityIcon(priority) {
+        switch (priority) {
+            case 'Highest':
+                return (
+                    <span className="text-red-500 text-sm">
+                        <FaChevronUp />
+                        <FaChevronUp className="-mt-2" />
+                    </span>
+                );
+            case 'High':
+                return <FaChevronUp className="text-red-400 text-sm" />;
+            case 'Medium':
+                return <FaEquals className="text-gray-500 text-sm" />;
+            case 'Low':
+                return <FaChevronDown className="text-blue-400 text-sm" />;
+            default:
+                return null;
+        }
+    }
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownPriority = useRef(null);
+
+    const handlePriorityClick = () => {
+        setShowDropdown((prev) => !prev);
+    };
+
+    const handlePrioritySelect = (priorityId) => {
+        console.log(priorityId);
+        const PostData = async () => {
+            try {
+                const update = {
+                    epicId: item?.epicId,
+                    sprintId: item?.sprintId,
+                    name: item?.name,
+                    description: item?.description,
+                    priorityId: priorityId,
+                    assignedTo: item?.assignedTo,
+                    statusId: item?.statusId,
+                };
+
+                await apis
+                    .editUserStore(item?.storyId, update)
+                    .then((res) => {
+                        console.log(res);
+                        updateData(true);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowDropdown(false);
+    };
+
+    // Ẩn dropdown khi click ra ngoài
+    useEffect(() => {
+        function handleClickOutside(e) {
+            if (dropdownPriority.current && !dropdownPriority.current.contains(e.target)) {
+                setShowDropdown(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const epicRef = useRef(null);
 
@@ -148,11 +229,12 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             GetEpicById(item.epicId);
         }
         setSelectedStatusId(item.statusId);
-        if (!!item) {
+    }, [item]);
+    useEffect(() => {
+        if (!!item.storyId) {
             getTaskByStory(item.storyId);
         }
-    }, [item]);
-
+    }, [item.storyId]);
     const getUser = (id) => {
         const PostData = async () => {
             try {
@@ -189,7 +271,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                     description: item?.description,
                     priorityId: item?.priorityId,
                     assignedTo: userId,
-                    statusId: 1,
+                    statusId: item?.statusId,
                 };
 
                 await apis
@@ -352,10 +434,45 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             window.removeEventListener('mouseup', handleMouseUp);
         };
     }, []);
-
+    const handleDeleteStore = () => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .deleteStore(item?.storyId)
+                    .then((res) => {
+                        updateData(true);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
+    const handleDeleteTask = (id) => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .deleteTask(id)
+                    .then((res) => {
+                        getTaskByStory(item?.storyId)
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
     const containerRef = useRef(null);
     return (
-        <>
+        <div>
             <div
                 ref={setNodeRef}
                 {...attributes}
@@ -369,8 +486,19 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                 ></div>
                 <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
                     <div className="flex items-center space-x-3">
-                        <div className=" relative items-center">
-                            <i className="fas fa-chevron-down text-gray-600"></i>
+                        <div className="w-[20px]">
+                            {subTask.length > 0 && (
+                                <div
+                                    className="relative items-center cursor-pointer hover:bg-neutral-300 px-2 rounded"
+                                    onClick={() => setShowSubTasks((prev) => !prev)}
+                                >
+                                    <i
+                                        className={`fas ${
+                                            showSubTasks ? 'fa-chevron-down' : 'fa-chevron-right'
+                                        } text-gray-600`}
+                                    ></i>
+                                </div>
+                            )}
                         </div>
                         <input
                             type="checkbox"
@@ -382,14 +510,14 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         </span>
                     </div>
                     <div className="flex relative items-center space-x-3">
-                        <div className="relative w-[50px]" ref={epicRef}>
+                        <div className="relative w-fit " ref={epicRef}>
                             {!!item && epic.epicId === item.epicId ? (
                                 <div
                                     onClick={(e) => {
                                         stopDrag(e);
                                         setShowEpic((prev) => !prev);
                                     }}
-                                    className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
+                                    className={`rounded-lg flex gap-2 items-center px-2 justify-center text-lg font-bold ${getColorFromStatus(
                                         epic.name,
                                     )}`}
                                 >
@@ -471,9 +599,26 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
                             -
                         </button>
-                        <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
-                            =
-                        </button>
+                        <div className="relative " ref={dropdownPriority}>
+                            <button onClick={handlePriorityClick} className="text-orange-600 w-[40px] text-xl px-2">
+                                {getPriorityIcon(priority[item.priorityId])}
+                            </button>
+
+                            {showDropdown && (
+                                <div className="absolute z-50 mt-2 right-0 w-40 bg-white border shadow-md rounded">
+                                    {Object.entries(priority).map(([id, label]) => (
+                                        <div
+                                            key={id}
+                                            onClick={() => handlePrioritySelect(Number(id))}
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800 flex gap-2 items-center"
+                                        >
+                                            <span>{getPriorityIcon(label)}</span>
+                                            <span>{label}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
 
                         {item != undefined && !!item.assignedTo ? (
                             <div
@@ -550,216 +695,233 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         <div className="group w-[40px]">
                             <button
                                 className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
-                                onClick={() => {
-                                    setShowEdit((prev) => !prev);
-                                }}
+                                onClick={() => setShowEdit((prev) => !prev)}
                             >
                                 <i className="fas fa-ellipsis-h text-gray-600"></i>
                             </button>
+
+                            {/* Dropdown hiển thị khi showEdit = true */}
+                            {showEdit && (
+                                <div className="absolute top-full right-0 mt-2 z-10 bg-white border rounded shadow-md w-32">
+                                    <button
+                                        onClick={() => {
+                                            handleDeleteStore(); // xử lý xóa
+                                            setShowEdit(false);
+                                        }}
+                                        className="w-full text-left px-4 font-bold text-lg py-2 text-red-600 hover:bg-red-50"
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
-            {subTask.length > 0 ?? subTask.map((data,index)=>
-            <div
-                key={index}
-                    className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
-                >
-                    <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
-                        <div className="flex items-center space-x-3">
-                            <div className=" relative items-center">
-                                <i className="fas fa-chevron-down text-gray-600"></i>
+            {showSubTasks &&
+                subTask.map((data, index) => (
+                    <div
+                        key={index}
+                        className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
+                    >
+                        <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
+                            <div className="flex pl-16 items-center space-x-3">
+                                <FontAwesomeIcon icon={faDiagramSuccessor} style={{ color: '#31a3d3' }} />
+                                <span className="text-xl text-gray-900">
+                                    <span className="font-semibold">{data.name}</span>
+                                </span>
                             </div>
-                            <input
-                                type="checkbox"
-                                className="w-4 h-4 text-blue-600 border-gray-300 rounded"
-                                onClick={stopDrag}
-                            />
-                            <span className="text-xl text-gray-900">
-                                <span className="font-semibold">NHOM4-{index + 1}</span> { data.name}
-                            </span>
-                        </div>
-                        <div className="flex relative items-center space-x-3">
-                            <div className="relative w-[50px]" ref={epicRef}>
-                                {!!item && epic.epicId === data.epicId ? (
-                                    <div
-                                        onClick={(e) => {
-                                            stopDrag(e);
-                                            setShowEpic((prev) => !prev);
-                                        }}
-                                        className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
-                                            epic.name,
-                                        )}`}
-                                    >
-                                        <div className="text-purple-300">
-                                            <i className="fas fa-bolt"></i>
+                            <div className="flex relative items-center space-x-3">
+                                <div className="relative w-[50px]" ref={epicRef}>
+                                    {!!item && epic.epicId === data.epicId ? (
+                                        <div
+                                            onClick={(e) => {
+                                                stopDrag(e);
+                                                setShowEpic((prev) => !prev);
+                                            }}
+                                            className={`rounded-lg flex gap-2 items-center justify-center text-lg font-bold ${getColorFromStatus(
+                                                epic.name,
+                                            )}`}
+                                        >
+                                            <div className="text-purple-300">
+                                                <i className="fas fa-bolt"></i>
+                                            </div>
+                                            {epic.name}
                                         </div>
-                                        {epic.name}
-                                    </div>
-                                ) : (
+                                    ) : (
+                                        <button
+                                            onClick={(e) => {
+                                                stopDrag(e);
+                                            }}
+                                            className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
+                                        >
+                                            + Epic
+                                        </button>
+                                    )}
+                                    {/* {showEpic && (
+                                        <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                            {epics.map((data, index) => (
+                                                <div
+                                                    key={index}
+                                                    ref={index === 0 ? firstItemRef : null}
+                                                    tabIndex={-1}
+                                                    onClick={() => handleSelectEpic(data.epicId)}
+                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    <div className="text-purple-300">
+                                                        <i className="fas fa-bolt"></i>
+                                                    </div>
+                                                    <div className="p-1 rounded-lg flex items-center text-lg font-bold">
+                                                        {data.name}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )} */}
+                                </div>
+                                <div className="relative w-[110px] " ref={statusRef}>
                                     <button
                                         onClick={(e) => {
                                             stopDrag(e);
-                                            setShowEpic((prev) => !prev);
                                         }}
-                                        className="border border-solid border-gray-200 text-lg px-2 py-1 font-semibold opacity-0 group-hover:opacity-100 pointer-events-auto transition hover:bg-neutral-200"
+                                        className={`flex items-center justify-center text-gray-700 font-semibold text-white text-sm min-w-[70px] rounded p-2 ${getColorFromStatus(
+                                            status.find((st) => st.id === data.statusId).title,
+                                        )}`}
                                     >
-                                        + Epic
+                                        {data && status.find((st) => st.id === data.statusId).title}
                                     </button>
-                                )}
-                                {showEpic && (
-                                    <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                        {epics.map((data, index) => (
-                                            <div
-                                                key={index}
-                                                ref={index === 0 ? firstItemRef : null}
-                                                tabIndex={-1}
-                                                onClick={() => handleSelectEpic(data.epicId)}
-                                                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                            >
-                                                <div className="text-purple-300">
-                                                    <i className="fas fa-bolt"></i>
-                                                </div>
-                                                <div className="p-1 rounded-lg flex items-center text-lg font-bold">
-                                                    {data.name}
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="relative w-[110px] " ref={statusRef}>
-                                <button
-                                    onClick={(e) => {
-                                        stopDrag(e);
-                                        setShowStatus((prev) => !prev);
-                                    }}
-                                    className={`flex items-center justify-center text-gray-700 font-semibold text-white text-sm min-w-[70px] rounded p-2 ${getColorFromStatus(
-                                        status.find((st) => st.id === data.statusId).title,
-                                    )}`}
-                                >
-                                    {data && status.find((st) => st.id === data.statusId).title}
-                                </button>
-                                {!!data && showStatus && (
-                                    <div className="absolute top-10 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                        {status
-                                            .filter((data) => data.id !== selectedStatusId)
-                                            .map((data, index) => (
-                                                <div
-                                                    key={data.id}
-                                                    ref={index === 0 ? firstItemRef : null}
-                                                    tabIndex={-1} // cần thiết để .focus() hoạt động
-                                                    onClick={() => {
-                                                        handleStatusSelect(data.id);
-                                                    }}
-                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                >
+                                    {/* {!!data && showStatus && (
+                                        <div className="absolute top-10 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                            {status
+                                                .filter((data) => data.id !== selectedStatusId)
+                                                .map((data, index) => (
                                                     <div
-                                                        className={`p-2 rounded-lg ${getColorFromStatus(
-                                                            data.title,
-                                                        )} flex items-center justify-center text-sm font-bold text-white min-w-[110px]`}
+                                                        key={data.id}
+                                                        ref={index === 0 ? firstItemRef : null}
+                                                        tabIndex={-1} // cần thiết để .focus() hoạt động
+                                                        onClick={() => {
+                                                            handleStatusSelect(data.id);
+                                                        }}
+                                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
                                                     >
-                                                        {data.title}
+                                                        <div
+                                                            className={`p-2 rounded-lg ${getColorFromStatus(
+                                                                data.title,
+                                                            )} flex items-center justify-center text-sm font-bold text-white min-w-[110px]`}
+                                                        >
+                                                            {data.title}
+                                                        </div>
                                                     </div>
+                                                ))}
+                                        </div>
+                                    )} */}
+                                </div>
+                                <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
+                                    -
+                                </button>
+                                <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
+                                    {getPriorityIcon(priority[item.priorityId])}
+                                </button>
+
+                                {item != undefined && !!item.assignedTo ? (
+                                    <div
+                                        ref={dropdownRef}
+                                        onClick={(e) => {
+                                            stopDrag(e);
+                                        }}
+                                        title={`Assignee: ${userAssignee?.userName}`}
+                                        className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                            userAssignee?.userName,
+                                        )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                                    >
+                                        {/* Avatar gồm nhiều chữ cái với màu riêng */}
+                                        {getInitialsElements(userAssignee?.userName)}
+
+                                        {/* {showAssigneeSelect && (
+                                            <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                                <div
+                                                    onClick={() => handleUserSelect(null)}
+                                                    className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                                >
+                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
+                                                        <i className="fas fa-user"></i>
+                                                    </div>
+                                                    <span className="text-gray-700">Un Assignee</span>
                                                 </div>
-                                            ))}
+                                                {user.map((data) => (
+                                                    <div
+                                                        key={data.userId}
+                                                        onClick={() => handleUserSelect(data.userId)}
+                                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                    >
+                                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                            {getInitials(data.userName)}
+                                                        </div>
+                                                        <span className="text-gray-700">{data.userName}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )} */}
+                                    </div>
+                                ) : (
+                                    <div
+                                        ref={dropdownRef}
+                                        onClick={(e) => {
+                                            stopDrag(e);
+                                        }}
+                                        title="Click to assign user"
+                                        className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
+                                    >
+                                        <i className="fas fa-user"></i>
+
+                                        {/* {showAssigneeSelect && (
+                                            <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                                {user.map((data) => (
+                                                    <li
+                                                        key={data.userId}
+                                                        onClick={() => handleUserSelect(data.userId)}
+                                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                    >
+                                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                                            {getInitials(data.userName)}
+                                                        </div>
+                                                        <span className="text-gray-700 font-bold">{data.userName}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )} */}
                                     </div>
                                 )}
-                            </div>
-                            <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
-                                -
-                            </button>
-                            <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
-                                =
-                            </button>
 
-                            {item != undefined && !!item.assignedTo ? (
-                                <div
-                                    ref={dropdownRef}
-                                    onClick={(e) => {
-                                        stopDrag(e);
-                                        setShowAssigneeSelect((prev) => !prev);
-                                    }}
-                                    title={`Assignee: ${userAssignee?.userName}`}
-                                    className={`relative w-10 h-10 rounded-full  ${getColorFromName(
-                                        userAssignee?.userName,
-                                    )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
-                                >
-                                    {/* Avatar gồm nhiều chữ cái với màu riêng */}
-                                    {getInitialsElements(userAssignee?.userName)}
+                                <div key={index} className="relative group w-[40px]">
+                                    <button
+                                        className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
+                                        onClick={() => {
+                                            setShowDeleteTaskId((prevId) => (prevId === index ? null : index));
+                                        }}
+                                    >
+                                        <i className="fas fa-ellipsis-h text-gray-600"></i>
+                                    </button>
 
-                                    {showAssigneeSelect && (
-                                        <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
-                                            <div
-                                                onClick={() => handleUserSelect(null)}
-                                                className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                    {showDeleteTaskId === index && (
+                                        <div className="absolute top-full right-0 mt-2 z-10 bg-white border rounded shadow-md w-32">
+                                            <button
+                                                onClick={() => {
+                                                    handleDeleteTask(data.taskId); // truyền id để xử lý
+                                                    setShowDeleteTaskId(null);
+                                                }}
+                                                className="w-full text-left px-4 font-bold text-lg py-2 text-red-600 hover:bg-red-50"
                                             >
-                                                <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
-                                                    <i className="fas fa-user"></i>
-                                                </div>
-                                                <span className="text-gray-700">Un Assignee</span>
-                                            </div>
-                                            {user.map((data) => (
-                                                <div
-                                                    key={data.userId}
-                                                    onClick={() => handleUserSelect(data.userId)}
-                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                        {getInitials(data.userName)}
-                                                    </div>
-                                                    <span className="text-gray-700">{data.userName}</span>
-                                                </div>
-                                            ))}
+                                                Delete
+                                            </button>
                                         </div>
                                     )}
                                 </div>
-                            ) : (
-                                <div
-                                    ref={dropdownRef}
-                                    onClick={(e) => {
-                                        stopDrag(e);
-                                        setShowAssigneeSelect((prev) => !prev);
-                                    }}
-                                    title="Click to assign user"
-                                    className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
-                                >
-                                    <i className="fas fa-user"></i>
-
-                                    {showAssigneeSelect && (
-                                        <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                            {user.map((data) => (
-                                                <li
-                                                    key={data.userId}
-                                                    onClick={() => handleUserSelect(data.userId)}
-                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                        {getInitials(data.userName)}
-                                                    </div>
-                                                    <span className="text-gray-700 font-bold">{data.userName}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="group w-[40px]">
-                                <button
-                                    className="opacity-0 group-hover:opacity-100 transition rounded px-2 py-1 hover:bg-neutral-200"
-                                    onClick={() => {
-                                        setShowEdit((prev) => !prev);
-                                    }}
-                                >
-                                    <i className="fas fa-ellipsis-h text-gray-600"></i>
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </>
+                ))}
+        </div>
     );
 }
 
@@ -813,6 +975,14 @@ function SprintColumn({ id, taskSprint, items, isUpda, renderTask }) {
         };
         PostData();
     };
+        const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        }).format(date);
+    };
     return (
         <div
             ref={setNodeRef}
@@ -834,7 +1004,11 @@ function SprintColumn({ id, taskSprint, items, isUpda, renderTask }) {
                         <i className="fas fa-chevron-down text-gray-600"></i>
                         <span id={`${taskSprint?.sprintId}-heading`}>{taskSprint?.name}</span>
                     </button>
-                    <span className="text-gray-500 text-xl">{taskSprint?.startDate}</span>
+                    <div className='flex gap-3 items-center'>
+                        <span className="text-gray-500 text-xl">{formatDate(taskSprint?.startDate)}</span>
+                    -
+                    <span className="text-gray-500 text-xl">{formatDate(taskSprint?.endDate)}</span>
+                    </div>
                 </div>
                 <div className="flex items-center space-x-3">
                     <div className="ml-auto flex items-center space-x-1 text-lg font-semibold rounded-md px-1.5 py-0.5">
@@ -1223,7 +1397,11 @@ function BlackLog() {
                         </div>
                     </DndContext>
                 </div>
-                {isShowRightPanel ? <RightPanel key={detail.storyId} item={detail.storyId} /> : <></>}
+                {isShowRightPanel ? (
+                    <RightPanel key={detail.storyId} item={detail.storyId} update={setIsUpdate} />
+                ) : (
+                    <></>
+                )}
             </div>
 
             <DragOverlay>

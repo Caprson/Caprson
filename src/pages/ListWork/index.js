@@ -538,7 +538,9 @@ function ListWork() {
                                     <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
                                         Sprint
                                     </th>
-                                    <th className="w-12 p-3 border-b border-gray-300" />
+                                    <th className="w-12 p-3 border-b border-gray-300" >
+                                        Assignee
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>

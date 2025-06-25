@@ -29,7 +29,7 @@ export const deleteProject = (param) =>
         }
     });
 
-export const updateProject = (datas,param) =>
+export const updateProject = (datas, param) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -58,13 +58,13 @@ export const getallProject = () =>
         }
     });
 
-export const createEpic = (datas,param) =>
+export const createEpic = (datas, param) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
                 url: `projects/epic/${param}/project`,
                 method: 'post',
-                data:datas,
+                data: datas,
                 withCredentials: true,
             });
             resolve(response);
@@ -72,17 +72,17 @@ export const createEpic = (datas,param) =>
             reject(error);
         }
     });
-export const createUserStore = (type,data) =>
+export const createUserStore = (type, data) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
                 url: `projects/${type}`,
                 method: 'post',
-                data:data,
+                data: data,
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -94,35 +94,69 @@ export const getUserStore = () =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: "projects/stories/project",
+                url: 'projects/stories/project',
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const editUserStore = (id,datas) =>
+export const editUserStore = (id, datas) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
                 url: `projects/stories/${id}`,
                 method: 'put',
                 withCredentials: true,
-                data:datas,
+                data: datas,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
+
+export const deleteStore = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/stories/${id}`,
+                method: 'delete',
+                withCredentials: true,
+                headers: {
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+export const deleteTask = (id) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/tasks/${id}`,
+                method: 'delete',
+                withCredentials: true,
+                headers: {
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
+
 export const createSprint = (datas) =>
     new Promise(async (resolve, reject) => {
         try {
@@ -130,10 +164,10 @@ export const createSprint = (datas) =>
                 url: `projects/sprint`,
                 method: 'post',
                 withCredentials: true,
-                data:datas,
+                data: datas,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -148,8 +182,8 @@ export const getSprintByProject = () =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -165,8 +199,8 @@ export const addPeopleProject = (datas) =>
                 data: datas,
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -181,8 +215,8 @@ export const getUseByProject = () =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -196,24 +230,23 @@ export const getUseById = (id) =>
                 url: `users/customer/${id}`,
                 method: 'get',
                 withCredentials: true,
-                
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const updateSprint = (id,datas) =>
+export const updateSprint = (id, datas) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
                 url: `projects/sprint/${id}`,
                 method: 'put',
                 withCredentials: true,
-                data:datas,
+                data: datas,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -229,8 +262,8 @@ export const getUserStoreBySprintId = (id) =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
@@ -241,20 +274,20 @@ export const createBug = (data) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: "bugs/bug",
+                url: 'bugs/bug',
                 method: 'post',
-                data:data,
+                data: data,
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getUserStoryById= (id) =>
+export const getUserStoryById = (id) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -262,15 +295,15 @@ export const getUserStoryById= (id) =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getSprintById= (id) =>
+export const getSprintById = (id) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -278,15 +311,15 @@ export const getSprintById= (id) =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getTaskByStoryId= (id) =>
+export const getTaskByStoryId = (id) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -294,15 +327,15 @@ export const getTaskByStoryId= (id) =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getAllEpics= () =>
+export const getAllEpics = () =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -310,15 +343,15 @@ export const getAllEpics= () =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getEpicById= (id) =>
+export const getEpicById = (id) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
@@ -326,33 +359,27 @@ export const getEpicById= (id) =>
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-export const getAllBug= () =>
+export const getAllBug = () =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: `bugs/bug/projects/${localStorage.getItem("projectId")}/bugs`,
+                url: `bugs/bug/projects/${localStorage.getItem('projectId')}/bugs`,
                 method: 'get',
                 withCredentials: true,
                 headers: {
-                    "X-Project-Id" : localStorage.getItem("projectId")
-                }
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
             });
             resolve(response);
         } catch (error) {
             reject(error);
         }
     });
-
-
-
-
-
-    

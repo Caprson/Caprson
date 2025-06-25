@@ -4,8 +4,10 @@ import * as apis from '../../apis';
 import { useSelector, useDispatch } from 'react-redux';
 import * as actions from '../../store/actions';
 import { FaChevronUp, FaChevronDown, FaEquals } from 'react-icons/fa';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDiagramSuccessor } from '@fortawesome/free-solid-svg-icons';
 
-function RightPanel({ item }) {
+function RightPanel({ item,update }) {
     const modalRef = useRef();
     const [isShowSubTask, setIsShowSubTask] = useState(false);
     const [subTaskName, setSubTaskName] = useState('');
@@ -27,12 +29,12 @@ function RightPanel({ item }) {
         3: 'High',
         4: 'Highest',
     };
-        const status = [
-        { id: 1, title: 'TO DO' },
-        { id: 2, title: 'IN PROGRESS' },
-        { id: 3, title: 'IN REVIEW' },
-        { id: 4, title: 'DONE' },
-    ];
+    const status = {
+        1: 'TO DO',
+        2: 'IN PROGRESS',
+        3: 'IN REVIEW',
+        4: 'DONE',
+    };
     const handleSubmid = async () => {
         const task = {
             storyId: userStory.storyId,
@@ -49,6 +51,7 @@ function RightPanel({ item }) {
             .then((res) => {
                 setSubTaskName('');
                 setIsShowSubTask(false);
+                getTaskByStory(item);
             })
             .catch((error) => {
                 console.error('Registration error: ', error);
@@ -80,7 +83,7 @@ function RightPanel({ item }) {
 
     useEffect(() => {
         getUserStoryById(item);
-        getTaskByStory(item)
+        getTaskByStory(item);
     }, [item]);
 
     const GetUserByProject = async () => {
@@ -154,11 +157,11 @@ function RightPanel({ item }) {
         PostData();
     };
     useEffect(() => {
-        if (!!userStory && !!userStory.assignedTo && userStory.updatedBy != '') {
+        if (!!userStory && userStory.assignedTo!='' ) {
             getUser(userStory?.assignedTo);
-            getUserRP(userStory?.updatedBy);
-            if (!!userStory.sprintId) getSprintById(userStory.sprintId);
         }
+        if(userStory.updatedBy != '') getUserRP(userStory?.updatedBy);
+        if (!!userStory.sprintId) getSprintById(userStory.sprintId);
     }, [userStory]);
     function getInitials(name = '') {
         if (!name) return '';
@@ -186,7 +189,7 @@ function RightPanel({ item }) {
                 return null;
         }
     }
-   
+
     const handleChange = async (e) => {
         const update = {
             epicId: userStory?.epicId,
@@ -211,7 +214,9 @@ function RightPanel({ item }) {
             toast.error('An error occurred during sign up. Please try again.');
         }
     };
-
+    const handleCreateChild = (parentTask) => {
+        // Gọi form tạo task với parentId = parentTask.storyId (hoặc id gì đó)
+    };
     const handleSave = () => {};
     return (
         <div class="flex flex-col w-2/5 border-l border-gray-200 overflow-y-auto p-6 space-y-6">
@@ -292,64 +297,60 @@ function RightPanel({ item }) {
                     </div>
                 )}
             </div>
-            {/* {subTask.length > 0 &&  */}
-            <div>
-                <table className="border-collapse">
-                    <thead className="sticky top-0 z-10">
-                        <tr>
-                            <th className="p-3 border-b border-r border-gray-300 text-sm text-center">Type</th>
-                            <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Key</th>
-                            <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Summary</th>
-                            <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Status</th>
-                            <th className="p-3 border-b border-r border-gray-200 text-sm text-left">Sprint</th>
-                            <th className="w-12 p-3 border-b border-gray-300" />
-                        </tr>
-                    </thead>
-                    <tbody>
-                        
-                         { subTask.map((data, index) => (
-                            <tr key={index} className="group hover:bg-neutral-100 h-[40px]">
-                                
-                                <td className="relative w-[110px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <div className="w-4 text-blue-500  text-lg">
-                                            <i className="fas fa-check-square" />
-                                        </div>
-                                        
-                                        <div className="w-4 ">
-                                            <button
-                                                title="Create child work item"
-                                                onClick={() => handleCreateChild()}
-                                                className="hidden group-hover:inline-flex text-2xl text-gray-400 hover:text-gray-500"
-                                            >
-                                                <i className="fas fa-plus" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                    <i class="fa-solid fa-diagram-subtask" style="color: #30c9e8;"></i>
-                                </td>
-                                <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                    {data.name}
-                                </td>
-                                <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
-                                    <span className="inline-block bg-gray-300 text-gray-900 font-semibold text-lg  rounded">
-                                        {status[data.statusId]}
-                                    </span>
-                                </td>
-                               
-                                <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                                    <div className="w-8 h-8 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-xs font-semibold text-white">
-                                       
-                                    </div>
-                                </td>
+            {subTask.length > 0 && (
+                <div>
+                    <table className="border-collapse">
+                        <thead className="sticky top-0 z-10">
+                            <tr>
+                                <th className="p-3 border-b border-r border-gray-300 text-sm text-center">Type</th>
+                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Key</th>
+                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Summary</th>
+                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Status</th>
+                                <th className="p-3 border-b border-r border-gray-200 text-sm text-left">Sprint</th>
+                                <th className="w-12 p-3 border-b border-gray-300" />
                             </tr>
-                        ))} 
-                    </tbody>
-                </table>
-            </div>
-            {/* } */}
+                        </thead>
+                        <tbody>
+                            {subTask.map((data, index) => (
+                                <tr key={index} className="group hover:bg-neutral-100 h-[40px]">
+                                    <td className="relative w-[110px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <div className="w-4 text-blue-500  text-lg">
+                                                <i className="fas fa-check-square" />
+                                            </div>
+
+                                            <div className="w-4 ">
+                                                <button
+                                                    title="Create child work item"
+                                                    onClick={() => handleCreateChild()}
+                                                    className="hidden group-hover:inline-flex text-2xl text-gray-400 hover:text-gray-500"
+                                                >
+                                                    <i className="fas fa-plus" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td  className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
+                                        <FontAwesomeIcon icon={faDiagramSuccessor} style={{ color: '#31a3d3' }} />
+                                    </td>
+                                    <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
+                                        {data.name}
+                                    </td>
+                                    <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b cursor-pointer border-r border-gray-300 text-left">
+                                        <span className="inline-block bg-gray-300 text-gray-900 font-semibold text-lg  rounded">
+                                            {status[data.statusId]}
+                                        </span>
+                                    </td>
+
+                                    <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                                        <div className="w-8 h-8 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-xs font-semibold text-white"></div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
             {isShowSubTask && (
                 <div className="box-border border-none mt-3">
                     <div className="w-full flex items-center gap-2">

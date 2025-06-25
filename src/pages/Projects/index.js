@@ -82,20 +82,20 @@ function Projects() {
         const index = name ? name.charCodeAt(0) % colors.length : 0;
         return colors[index];
     }
-       function getInitials(name = '') {
+    function getInitials(name = '') {
         if (!name) return '';
         const words = name.trim().split(' ');
         if (words.length === 1) return words[0][0].toUpperCase();
         return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
     }
     const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  }).format(date);
-};
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        }).format(date);
+    };
     return (
         <body class="bg-white text-gray-800 font-sans p-6">
             <div class="max-w-6xl mx-auto">
@@ -191,12 +191,14 @@ function Projects() {
                                     <td class="px-3 py-2 flex items-center space-x-2 text-gray-900 font-normal">
                                         <div
                                             aria-label="LD"
-                                            className={`w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-xs font-semibold text-white select-none ${getColorFromName(userMap[pj.createdBy]?.userName)}`}
+                                            className={`w-6 h-6 rounded-full bg-cyan-500 flex items-center justify-center text-xs font-semibold text-white select-none ${getColorFromName(
+                                                userMap[pj.createdBy]?.userName,
+                                            )}`}
                                         >
-                                           {getInitials(userMap[pj.createdBy]?.userName)}
+                                            {getInitials(userMap[pj.createdBy]?.userName)}
                                         </div>
 
-                                        <span> {userMap[pj.createdBy]?.userName }</span>
+                                        <span> {userMap[pj.createdBy]?.userName}</span>
                                     </td>
                                     <td class="w-20 px-3 py-2 text-center text-gray-400 cursor-pointer select-none">
                                         •••
