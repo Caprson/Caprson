@@ -348,7 +348,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
             }
         };
         PostData();
-        setShowStatus(false);
+        setShowEpic(false);
     };
 
     function getInitials(name = '') {
@@ -725,7 +725,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                         className="items-center group hover:bg-stone-100 relative bg-white rounded cursor-pointer select-none"
                     >
                         <div className="flex items-cente px-4 py-5 border border-gray-200 justify-between">
-                            <div className="flex pl-16 items-center space-x-3">
+                            <div className="flex pl-24 items-center space-x-3">
                                 <FontAwesomeIcon icon={faDiagramSuccessor} style={{ color: '#31a3d3' }} />
                                 <span className="text-xl text-gray-900">
                                     <span className="font-semibold">{data.name}</span>
@@ -779,7 +779,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                         </div>
                                     )} */}
                                 </div>
-                                <div className="relative w-[110px] " ref={statusRef}>
+                                <div className="relative w-[110px] " >
                                     <button
                                         onClick={(e) => {
                                             stopDrag(e);
@@ -825,7 +825,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
 
                                 {item != undefined && !!item.assignedTo ? (
                                     <div
-                                        ref={dropdownRef}
+                                        
                                         onClick={(e) => {
                                             stopDrag(e);
                                         }}
@@ -865,7 +865,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                     </div>
                                 ) : (
                                     <div
-                                        ref={dropdownRef}
+                                     
                                         onClick={(e) => {
                                             stopDrag(e);
                                         }}

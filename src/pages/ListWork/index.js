@@ -147,8 +147,12 @@ function ListWork() {
                     ? epicRes.data.data
                     : epicRes.data.data.filter((item) => selectedUserId.includes(item.assignedTo));
             // Giả sử mỗi response trả về .data là một mảng
-            const allData = [...assignedstoryRes, ...assignedbugsRes, ...assignedepicRes];
-
+            const allData = [
+                ...assignedstoryRes.map((item) => ({ ...item, type: 'story' })),
+                ...assignedbugsRes.map((item) => ({ ...item, type: 'bug' })),
+                ...assignedepicRes.map((item) => ({ ...item, type: 'epic' })),
+            ];
+            
             console.log('Merged Data:', allData);
             setDataAll(allData);
         } catch (error) {
@@ -441,7 +445,12 @@ function ListWork() {
                             <i className="fas fa-search"></i>
                         </span>
                     </div>
-                    <UserCircles user={users} idSelelct={selectedUserId} selectUser={setSelectedUserId} update={setIsUpdate} />
+                    <UserCircles
+                        user={users}
+                        idSelelct={selectedUserId}
+                        selectUser={setSelectedUserId}
+                        update={setIsUpdate}
+                    />
                     <button
                         className="border border-gray-300 rounded px-3 py-2 text-xl font-semibold text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600"
                         aria-haspopup="true"
@@ -538,9 +547,7 @@ function ListWork() {
                                     <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
                                         Sprint
                                     </th>
-                                    <th className="w-12 p-3 border-b border-gray-300" >
-                                        Assignee
-                                    </th>
+                                    <th className="w-12 p-3 border-b border-gray-300">Assignee</th>
                                 </tr>
                             </thead>
                             <tbody>
