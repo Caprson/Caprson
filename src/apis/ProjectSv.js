@@ -128,7 +128,7 @@ export const editEpic = (id, datas) =>
     new Promise(async (resolve, reject) => {
         try {
             const response = await axios({
-                url: `projects/epic/${id}/project`,
+                url: `projects/epic/${id} `,
                 method: 'put',
                 withCredentials: true,
                 data: datas,

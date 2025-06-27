@@ -128,7 +128,7 @@ export function Board() {
 
     return (
         <div className="max-h-full h-5/6 overflow-x-hidden overflow-y-hidden">
-            <div className="z-10 relative h-full flex">
+            <div className=" relative h-full flex">
                 <div className="min-w-[0px] w-full h-full">
                     <div className="relative max-h-full overflow-x-auto overflow-y-auto w-full h-full">
                         <section className="select-none min-h-full box-border min-w-fit pl-[20px] pb-[24px] items-stretch flex-row justify-start flex-nowrap flex pr-[24px] gap-3">

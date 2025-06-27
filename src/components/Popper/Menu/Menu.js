@@ -31,11 +31,8 @@ function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn 
     const renderItems = () => {
         return current.data.map((item, index) => {
             const isParent = !!item.children;
-            const isLogOut = item.to === '/logout';
-            if (isLogOut) {
-                item = { ...item, to: '/login' };
-            }
-            console.log(item);
+            const isLogOut = item.to === '/login';
+           
             return (
                 <MenuItem
                     key={index}

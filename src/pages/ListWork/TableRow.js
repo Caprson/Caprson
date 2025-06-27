@@ -1,13 +1,17 @@
 import Assignee from './Assignee';
 import * as apis from '../../apis';
 import { toast } from 'react-toastify';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, use } from 'react';
 
-function TableRow({ row }) {
+function TableRow({ row, update }) {
     const [userAssignee, setUserAssignee] = useState({});
     const [sprint, setSprint] = useState({});
     const [showStatus, setShowStatus] = useState(false);
     const [showAssignee, setShowAssignee] = useState(false);
+    const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
+    const [user, setUser] = useState([]);
+
+    const dropdownRef = useRef(null);
     const status = {
         1: 'TO DO',
         2: 'IN PROGRESS',
@@ -50,6 +54,12 @@ function TableRow({ row }) {
                 return 'bg-gray-200';
         }
     }
+    function getColorFromName(name = '') {
+        const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
+        const index = name ? name.charCodeAt(0) % colors.length : 0;
+        return colors[index];
+    }
+
     const getUser = (id) => {
         const PostData = async () => {
             try {
@@ -87,7 +97,7 @@ function TableRow({ row }) {
         PostData();
     };
     useEffect(() => {
-        if (!!row.assignedTo || row.assignedTo !== '') getUser(row.assignedTo);
+        if (row.assignedTo !== undefined || row.assignedTo !== '') getUser(row.assignedTo);
         if (!!row.sprintId) getSprint(row.sprintId);
     }, [row]);
     function getInitials(name = '') {
@@ -129,17 +139,17 @@ function TableRow({ row }) {
             id: 4,
             name: 'Bug',
             icon: '🐞',
-            type :'bug',
+            type: 'bug',
             buildPayload: (name) => ({
-                projectId: localStorage.getItem('projectId'),
-                storyId: name.storyId,
-                taskId: name.taskId,
+                bugId: name.bugId,
                 title: name.title,
                 description: name.description,
                 assignedTo: name.assignedTo,
                 severityId: name.severityId,
                 priorityId: name.priorityId,
                 statusId: name.statusId,
+                updatedBy: name.updatedBy,
+                comment: name.comment,
             }),
         },
     ];
@@ -175,7 +185,7 @@ function TableRow({ row }) {
                 } else if (matchedType.type === 'bug') {
                     await apis.editBug(row?.bugId, payload);
                 }
-
+                update(true);
                 toast.success('Cập nhật thành công!');
             } catch (error) {
                 console.error('Update error:', error);
@@ -185,7 +195,85 @@ function TableRow({ row }) {
         PostData();
         setShowStatus(false);
     };
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowAssigneeSelect(false);
+            }
+        }
 
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+    const handleUserSelect = (userId) => {
+        const PostData = async () => {
+            try {
+                let matchedType = null;
+
+                // Xác định type từ row
+                if ('title' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'bug');
+                } else if ('epicId' in row && 'sprintId' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'stories');
+                } else if ('startDate' in row && 'endDate' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'epic');
+                }
+
+                if (!matchedType) {
+                    toast.error('Không xác định được loại dữ liệu để cập nhật');
+                    return;
+                }
+
+                const payload = {
+                    ...matchedType.buildPayload(row),
+                    assignedTo: userId, // override lại status
+                };
+
+                if (matchedType.type === 'epic') {
+                    await apis.editEpic(row?.epicId, payload);
+                } else if (matchedType.type === 'stories') {
+                    await apis
+                        .editUserStore(row?.storyId, payload)
+                        .then((res) => {
+                            if (update.assignedTo !== null) getUser(update?.assignedTo);
+                            setShowAssigneeSelect(false);
+                        })
+                        .catch((error) => {
+                            console.error('Registration error: ', error);
+                            toast.error('An error occurred during sign up. Please try again.');
+                        });
+                } else if (matchedType.type === 'bug') {
+                    await apis.editBug(row?.bugId, payload);
+                }
+                update(true);
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowAssigneeSelect(false);
+    };
+    const GetUserByProject = async () => {
+        try {
+            await apis
+                .getUseByProject()
+                .then((res) => {
+                    setUser(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+    useEffect(() => {
+        GetUserByProject();
+    }, []);
+    console.log(user);
     return (
         <tr className="group hover:bg-neutral-100 h-[40px]">
             <td className="p-4 border-b border-r border-gray-300 text-center">
@@ -217,7 +305,7 @@ function TableRow({ row }) {
             <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
                 {row.name || row.title}
             </td>
-            <td   ref={firstItemRef} className="px-4 w-[120px] relative   whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
+            <td className="px-4 w-[120px] relative   whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
                 <div
                     onClick={() => setShowStatus((prev) => !prev)}
                     className={`${getColorFromStatus(
@@ -227,7 +315,10 @@ function TableRow({ row }) {
                     {status[row.statusId]}
                 </div>
                 {showStatus && (
-                    <div className="absolute top-10 right-0 z-50 w-64 py-3 bg-white shadow-xl border rounded text-lg overflow-hidden">
+                    <div
+                        ref={firstItemRef}
+                        className="absolute top-10 right-0 z-50 w-64 py-3 bg-white shadow-xl border rounded text-lg overflow-hidden"
+                    >
                         {Object.entries(status).map(([id, title], index) => (
                             <div
                                 key={id}
@@ -257,17 +348,74 @@ function TableRow({ row }) {
                     </span>
                 )}
             </td>
-            <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+            <td className="px-4 w-[180px]  relative  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.assignedTo && row.assignedTo !== '' ? (
                     <div className="flex gap-3 items-center">
-                        <div className="w-10 h-10 border-r rounded-full bg-[#0ea5e9] flex items-center justify-center text-sm font-semibold text-white">
+                        <div
+                            ref={dropdownRef}
+                            onClick={() => {
+                                setShowAssigneeSelect((prev) => !prev);
+                            }}
+                            title={`Assignee: ${userAssignee?.userName}`}
+                            className={` w-10 h-10 rounded-full  ${getColorFromName(
+                                userAssignee?.userName,
+                            )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                        >
                             {getInitials(userAssignee.userName)}
                         </div>
                         <span className="font-semibold text-lg text-gray-600">{userAssignee.email}</span>
+                        {showAssigneeSelect && (
+                            <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
+                                <div
+                                    onClick={() => handleUserSelect(null)}
+                                    className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
+                                >
+                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
+                                        <i className="fas fa-user"></i>
+                                    </div>
+                                    <span className="text-gray-700">Un Assignee</span>
+                                </div>
+                                {user.map((data) => (
+                                    <div
+                                        key={data.userId}
+                                        onClick={() => handleUserSelect(data.userId)}
+                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            {getInitials(data.userName)}
+                                        </div>
+                                        <span className="text-gray-700">{data.userName}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 ) : (
-                    <div className="w-10 h-10  rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center">
+                    <div
+                        ref={dropdownRef}
+                        onClick={() => {
+                            setShowAssigneeSelect((prev) => !prev);
+                        }}
+                        title="Click to assign user"
+                        className=" w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
+                    >
                         <i className="fas fa-user"></i>
+                        {showAssigneeSelect && (
+                            <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
+                                {user.map((data) => (
+                                    <li
+                                        key={data.userId}
+                                        onClick={() => handleUserSelect(data.userId)}
+                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                    >
+                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
+                                            {getInitials(data.userName)}
+                                        </div>
+                                        <span className="text-gray-700 font-bold">{data.userName}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 )}
             </td>

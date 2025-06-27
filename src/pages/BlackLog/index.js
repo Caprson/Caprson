@@ -279,7 +279,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                     .then((res) => {
                         if (update.assignedTo !== null) getUser(update?.assignedTo);
 
-                        GetUserByProject();
+                       
                         updateData(true);
                         setShowAssigneeSelect(false);
                     })
