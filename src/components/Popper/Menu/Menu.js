@@ -7,7 +7,8 @@ import MenuItem from './MenuItem';
 import Header from './Header';
 import styles from './Menu.module.scss';
 import { useState } from 'react';
-
+import * as apis from '../../../apis';
+import { toast } from 'react-toastify';
 const cx = classNames.bind(styles);
 
 const defaultFn = () => {};
@@ -15,11 +16,26 @@ const defaultFn = () => {};
 function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn }) {
     const [history, setHistory] = useState([{ data: items }]);
     const current = history[history.length - 1];
-
+    const handleLogOut = async () => {
+        await apis
+            .logout()
+            .then((res) => {
+                console.log(res);
+                window.localStorage.clear();
+            })
+            .catch((error) => {
+                console.error('Registration error: ', error);
+                toast.error('An error occurred during sign up. Please try again.');
+            });
+    };
     const renderItems = () => {
         return current.data.map((item, index) => {
             const isParent = !!item.children;
-
+            const isLogOut = item.to === '/logout';
+            if (isLogOut) {
+                item = { ...item, to: '/login' };
+            }
+            console.log(item);
             return (
                 <MenuItem
                     key={index}
@@ -27,6 +43,8 @@ function Menu({ children, items = [], hideOnClick = false, onChange = defaultFn 
                     onClick={() => {
                         if (isParent) {
                             setHistory((prev) => [...prev, item.children]);
+                        } else if (isLogOut) {
+                            handleLogOut();
                         } else {
                             onChange(item);
                         }
