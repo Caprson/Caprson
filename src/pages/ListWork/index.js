@@ -325,7 +325,12 @@ function ListWork() {
                                     <th className="p-3 border-b border-r border-gray-200 font-semibold text-left">
                                         Sprint
                                     </th>
-                                    <th className="w-12 p-3 border-b border-gray-300">Assignee</th>
+                                    <th className="w-12 p-3 border-b border-r font-semibold border-gray-300">Assignee</th>
+                                    <th className=" p-3 border-b border-gray-300 border-r font-semibold">Priority </th>
+
+                                    <th className=" p-3 border-b border-r font-semibold border-gray-300">Created</th>
+                                    <th className=" p-3 border-b border-r font-semibold border-gray-300">Updated</th>
+                                    <th className="w-10 p-3 border-b font-semibold border-gray-300">Reporter</th>
                                 </tr>
                             </thead>
                             <tbody>

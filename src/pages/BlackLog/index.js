@@ -32,6 +32,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const [selectedStatusId, setSelectedStatusId] = useState(1);
     const firstItemRef = useRef(null);
     const dispatch = useDispatch();
+    const projectName = localStorage.getItem('projectName');
 
     const status = [
         { id: 1, title: 'TO DO' },
@@ -506,7 +507,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             onClick={stopDrag}
                         />
                         <span className="text-xl text-gray-900">
-                            <span className="font-semibold">NHOM4-{index + 1}</span> {name}
+                            <span className="font-semibold">{projectName} - {index + 1}</span> {name}
                         </span>
                     </div>
                     <div className="flex relative items-center space-x-3">

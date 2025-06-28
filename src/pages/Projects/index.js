@@ -44,11 +44,12 @@ function Projects() {
         return username;
     };
 
-    const SelectProject = (proId) => {
+    const SelectProject = (proId,proName) => {
         navigate('/blacklog');
         if (proId !== null) {
             console.log(proId);
             localStorage.setItem('projectId', proId);
+            localStorage.setItem('projectName',proName)
         }
     };
     const [userMap, setUserMap] = useState({});
@@ -98,19 +99,19 @@ function Projects() {
     };
     return (
         <body class="bg-white text-gray-800 font-sans p-6">
-            <div class="max-w-6xl mx-auto">
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
-                    <h2 class="text-gray-900 font-semibold text-lg mb-4 sm:mb-0">Projects</h2>
+            <div class=" mx-auto">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                    <h2 class="text-gray-900 font-semibold text-lg mb-4 md:mb-0">Projects</h2>
                     <div class="flex space-x-2">
                         <button
-                            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-medium px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                             type="button"
                             onClick={() => navigate('/createProject')}
                         >
                             Create project
                         </button>
                         <button
-                            class="border border-gray-300 text-gray-700 text-sm font-normal px-3 py-2 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+                            class="border border-gray-300 text-gray-700 text-xl font-normal px-3 py-2 rounded hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                             type="button"
                         >
                             Templates
@@ -122,7 +123,7 @@ function Projects() {
                         Search projects
                     </label>
                     <input
-                        class="border border-gray-300 rounded px-3 py-2 text-sm text-gray-500 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-grow"
+                        class="border border-gray-300 rounded px-3 py-2 text-xl text-gray-500 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex-grow"
                         id="search"
                         placeholder="Search projects"
                         type="search"
@@ -131,14 +132,14 @@ function Projects() {
                         Filter by product
                     </label>
                     <select
-                        class="border border-gray-300 rounded px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-48"
+                        class="border border-gray-300 rounded px-3 py-2 text-xl text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-48"
                         id="filter"
                     >
                         <option>Filter by product</option>
                     </select>
                 </form>
                 <div class="overflow-x-auto border border-gray-300 rounded">
-                    <table class="min-w-full divide-y divide-gray-300 text-sm">
+                    <table class="min-w-full divide-y divide-gray-300 text-xl">
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="w-12 px-3 py-2 text-left text-gray-700 font-semibold" scope="col">
@@ -180,8 +181,8 @@ function Projects() {
                                             width="20"
                                         />
                                         <a
-                                            class="text-blue-600 hover:underline text-sm cursor-pointer font-normal"
-                                            onClick={() => SelectProject(pj?.projectId)}
+                                            class="text-blue-600 hover:underline text-xl cursor-pointer font-normal"
+                                            onClick={() => SelectProject(pj?.projectId,pj?.name)}
                                         >
                                             {pj.name}
                                         </a>
@@ -217,7 +218,7 @@ function Projects() {
                                         src="https://storage.googleapis.com/a1aa/image/3c95f2ef-dc82-4465-31db-0d9c0a0596a3.jpg"
                                         width="20"
                                     />
-                                    <a class="text-blue-600 hover:underline text-sm font-normal" href="#">
+                                    <a class="text-blue-600 hover:underline text-xl font-normal" href="#">
                                         WorkWave
                                     </a>
                                 </td>
@@ -239,7 +240,7 @@ function Projects() {
                 </div>
                 <nav
                     aria-label="Pagination"
-                    class="mt-6 flex justify-center items-center space-x-3 text-gray-500 text-sm select-none"
+                    class="mt-6 flex justify-center items-center space-x-3 text-gray-500 text-xl select-none"
                 >
                     <button
                         aria-label="Previous page"

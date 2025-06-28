@@ -24,7 +24,7 @@ const cx = classNames.bind(styles);
 
 function Sidebar() {
     const [suggestedUsers, setSuggestedUsers] = useState([]);
-    const [projects,setProjects] = useState([])
+    const [projects, setProjects] = useState([]);
     useEffect(() => {
         userService
             .getSuggested({ page: 1, perPage: 5 })
@@ -97,11 +97,21 @@ function Sidebar() {
                 </button>
 
                 <div class="mt-4 text-lg font-semibold text-gray-400 uppercase tracking-wide">Recent</div>
-                {projects.map((data,index) => (
+                {projects.map((data, index) => (
                     <NavLink
                         key={index}
                         to="/" // Thay đổi đường dẫn tùy ý
-                        className="flex items-center space-x-2 mt-1 px-2 py-1 rounded bg-blue-100 text-blue-700 font-semibold"
+                        onClick={() => {
+                            window.localStorage.setItem('projectId', data.projectId)
+                            window.localStorage.setItem('projectName',data.name)
+                        }}
+                        className={({ isActive }) =>
+                            `flex items-center mt-1 px-2 py-1 rounded space-x-1 pb-3 font-semibold  ${
+                                isActive
+                                    ? ' text-blue-600 bg-blue-100'
+                                    : 'border-transparent hover:text-gray-900 hover:border-gray-300'
+                            }`
+                        }
                     >
                         <svg
                             className="w-5 h-5"

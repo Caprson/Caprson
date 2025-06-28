@@ -5,6 +5,7 @@ import { useEffect, useState, useRef, use } from 'react';
 
 function TableRow({ row, update }) {
     const [userAssignee, setUserAssignee] = useState({});
+    const [userReport, setUserReport] = useState({});
     const [sprint, setSprint] = useState({});
     const [showStatus, setShowStatus] = useState(false);
     const [showAssignee, setShowAssignee] = useState(false);
@@ -22,6 +23,12 @@ function TableRow({ row, update }) {
         epic: '⚡',
         story: '📘',
         bug: '🐞',
+    };
+    const priority = {
+        1: 'Low',
+        2: 'Medium',
+        3: 'High',
+        4: 'Highest',
     };
     const firstItemRef = useRef(null);
 
@@ -78,6 +85,24 @@ function TableRow({ row, update }) {
         };
         PostData();
     };
+    const getUserReport = (id) => {
+        const PostData = async () => {
+            try {
+                await apis
+                    .getUseById(id)
+                    .then((res) => {
+                        setUserReport(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+    };
     const getSprint = (id) => {
         const PostData = async () => {
             try {
@@ -98,6 +123,7 @@ function TableRow({ row, update }) {
     };
     useEffect(() => {
         if (row.assignedTo !== undefined || row.assignedTo !== '') getUser(row.assignedTo);
+        if (!!row.createdBy || row.createdBy !== '') getUserReport(row.createdBy);
         if (!!row.sprintId) getSprint(row.sprintId);
     }, [row]);
     function getInitials(name = '') {
@@ -273,7 +299,14 @@ function TableRow({ row, update }) {
     useEffect(() => {
         GetUserByProject();
     }, []);
-    console.log(user);
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return new Intl.DateTimeFormat('en-GB', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+        }).format(date);
+    };
     return (
         <tr className="group hover:bg-neutral-100 h-[40px]">
             <td className="p-4 border-b border-r border-gray-300 text-center">
@@ -339,7 +372,14 @@ function TableRow({ row, update }) {
                 )}
             </td>
             <td className="px-4 w-[145px]  overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500">
-                <i className="far fa-comment-alt text-lg" /> Add comment
+                {row?.description !== '' || row?.comment !== '' ? (
+                    <span>{row?.description || row?.comment}</span>
+                ) : (
+                    <div>
+                        <i className="far fa-comment-alt text-lg" />
+                        <span>Add comment</span>
+                    </div>
+                )}
             </td>
             <td className="px-4 w-[145px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
                 {!!row.sprintId && (
@@ -416,6 +456,32 @@ function TableRow({ row, update }) {
                                 ))}
                             </ul>
                         )}
+                    </div>
+                )}
+            </td>
+            <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                {!!row.priorityId && priority[row.priorityId]}
+            </td>
+            <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                {!!row.createdAt && formatDate(row.createdAt)}
+            </td>
+            <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                {!!row.updatedAt && formatDate(row.updatedAt)}
+            </td>
+            <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                {!!row.createdBy && (
+                    <div>
+                        <div
+                          
+                            
+                            title={`Assignee: ${userReport?.userName}`}
+                            className={` w-10 h-10 rounded-full  ${getColorFromName(
+                                userReport?.userName,
+                            )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                        >   
+                            {getInitials(userReport.userName)}
+                        </div>
+                        <span className="font-semibold text-lg text-gray-600">{userReport.email}</span>
                     </div>
                 )}
             </td>
