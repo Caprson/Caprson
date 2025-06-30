@@ -23,6 +23,7 @@ function RightPanel({ item,update }) {
     const [description, setDescription] = useState('');
     const { isShowRightpanel } = useSelector((state) => state.app);
     const dispatch = useDispatch();
+    const projectName = localStorage.getItem('projectName');
     const priority = {
         1: 'Low',
         2: 'Medium',
@@ -227,7 +228,7 @@ function RightPanel({ item,update }) {
                         <span>Add parent</span>
                     </button>
                     <span>/</span>
-                    <span class="font-semibold">NHOM4-19</span>
+                    <span class="font-semibold">{projectName} - {userStory?.storyId}</span>
                 </div>
                 <div>
                     <button

@@ -507,7 +507,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             onClick={stopDrag}
                         />
                         <span className="text-xl text-gray-900">
-                            <span className="font-semibold">{projectName} - {index + 1}</span> {name}
+                            <span className="font-semibold">{projectName} - {item?.storyId}</span> {name}
                         </span>
                     </div>
                     <div className="flex relative items-center space-x-3">
@@ -597,13 +597,14 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                 </div>
                             )}
                         </div>
-                        <button onClick={stopDrag} className="text-gray-500 w-[40px] text-xl px-2">
-                            -
-                        </button>
+                       
                         <div className="relative " ref={dropdownPriority}>
-                            <button onClick={handlePriorityClick} className="text-orange-600 w-[40px] text-xl px-2">
+                            <div className='flex items-center w-[60px]'>
+                                <button onClick={handlePriorityClick} className="text-orange-600 text-xl px-2">
                                 {getPriorityIcon(priority[item.priorityId])}
-                            </button>
+                            </button >
+                            <span className='font-medium text-lg '>{priority[item.priorityId]}</span>
+                            </div>
 
                             {showDropdown && (
                                 <div className="absolute z-50 mt-2 right-0 w-40 bg-white border shadow-md rounded">
@@ -1399,7 +1400,7 @@ function BlackLog() {
                     </DndContext>
                 </div>
                 {isShowRightPanel ? (
-                    <RightPanel key={detail.storyId} item={detail.storyId} update={setIsUpdate} />
+                    <RightPanel key={detail.storyId} item={detail.storyId}  update={setIsUpdate} />
                 ) : (
                     <></>
                 )}

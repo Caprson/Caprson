@@ -2,7 +2,7 @@ import Assignee from './Assignee';
 import * as apis from '../../apis';
 import { toast } from 'react-toastify';
 import { useEffect, useState, useRef, use } from 'react';
-
+import { FaChevronUp, FaChevronDown, FaEquals } from 'react-icons/fa';
 function TableRow({ row, update }) {
     const [userAssignee, setUserAssignee] = useState({});
     const [userReport, setUserReport] = useState({});
@@ -30,6 +30,25 @@ function TableRow({ row, update }) {
         3: 'High',
         4: 'Highest',
     };
+        function getPriorityIcon(priority) {
+            switch (priority) {
+                case 'Highest':
+                    return (
+                        <span className="text-red-500 text-sm">
+                            <FaChevronUp />
+                            <FaChevronUp className="-mt-2" />
+                        </span>
+                    );
+                case 'High':
+                    return <FaChevronUp className="text-red-400 text-sm" />;
+                case 'Medium':
+                    return <FaEquals className="text-gray-500 text-sm" />;
+                case 'Low':
+                    return <FaChevronDown className="text-blue-400 text-sm" />;
+                default:
+                    return null;
+            }
+        }
     const firstItemRef = useRef(null);
 
     useEffect(() => {
@@ -460,7 +479,10 @@ function TableRow({ row, update }) {
                 )}
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                {!!row.priorityId && priority[row.priorityId]}
+                {!!row.priorityId && <div className='flex items-center gap-2'>
+                    <span>{getPriorityIcon(priority[row.priorityId])}</span>
+                    <span>{priority[row.priorityId]}</span>
+                </div> }
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.createdAt && formatDate(row.createdAt)}
@@ -470,7 +492,7 @@ function TableRow({ row, update }) {
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.createdBy && (
-                    <div>
+                    <div className='flex -items-center gap-2'>
                         <div
                           
                             

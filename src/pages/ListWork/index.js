@@ -298,7 +298,7 @@ function ListWork() {
                 <div className=" overflow-x-hidden overflow-y-hidden  ">
                     <div className="overflow-x-auto overflow-y-auto max-h-[450px] shadow">
                         <table className="min-w-[900px] w-full border-collapse text-2xl text-gray-700">
-                            <thead className="bg-gray-100 sticky top-0 ">
+                            <thead className="bg-gray-100 sticky z-10 top-0 ">
                                 <tr>
                                     <th className="w-12 p-4 border-b border-r border-gray-300 text-center">
                                         <input
