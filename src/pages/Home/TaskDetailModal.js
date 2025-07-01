@@ -11,11 +11,21 @@ export const TaskDetailModal = ({ task, onClose }) => {
     const taskId = task?.bugId || task?.storyId;
     const isBug = !!task?.bugId;
     const [isShowSubTask, setIsShowSubTask] = useState(false);
+    const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
     const [subTask, setSubTask] = useState([]);
     const [subTaskName, setSubTaskName] = useState('');
     const [sprint, setSprint] = useState({});
     const [userAssignee, setUserAssignee] = useState({});
     const [userReport, setUserReport] = useState({});
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedName, setEditedName] = useState('');
+    const projectName = localStorage.getItem('projectName');
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
+    const dropdownRef = useRef(null);
+    const [user, setUser] = useState([]);
+    const [showAssigneeIndex, setShowAssigneeIndex] = useState(null);
+
     const status = {
         1: 'TO DO',
         2: 'IN PROGRESS',
@@ -47,6 +57,75 @@ export const TaskDetailModal = ({ task, onClose }) => {
                 return null;
         }
     }
+    const handleUpdateTitle = async () => {
+        if (!editedTitle.trim()) return;
+        try {
+            if (!isBug) {
+                const payload = {
+                    epicId: task?.epicId,
+                    sprintId: task?.sprintId,
+                    name: editedTitle,
+                    description: task?.description,
+                    priorityId: task?.priorityId,
+                    assignedTo: task?.assignedTo,
+                    statusId: task?.statusId,
+                };
+                await apis.editUserStore(task?.storyId, payload).then((res) => {
+                    console.log(res)
+                });
+                // Optionally reload or update local state
+                setIsEditingTitle(false);
+            }
+        } catch (err) {
+            console.error('Failed to update title:', err);
+        }
+    };
+    const handleChangeStatus = async (e, data) => {
+        const update = {
+            storyId: data.storyId,
+            assignedTo: data?.assignedTo,
+            name: data?.name,
+            description: data.description,
+            statusId: e.target.value,
+            estimatedHours: data.estimatedHours,
+            loggedHours: data?.loggedHours,
+            remainingHours: data?.remainingHours,
+        };
+        try {
+            await apis
+                .editTask(data?.taskId, update)
+                .then((res) => {
+                    getTaskByStory(task?.storyId);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+    const handleUpdateName = async (data, newName) => {
+        if (!newName.trim()) return;
+        try {
+            const payload = {
+                storyId: data.storyId,
+                assignedTo: data?.assignedTo,
+                name: newName,
+                description: data.description,
+                statusId: data?.statusId,
+                estimatedHours: data.estimatedHours,
+                loggedHours: data?.loggedHours,
+                remainingHours: data?.remainingHours,
+            };
+            await apis.editTask(data.taskId, payload).then(() => {
+                getTaskByStory(task?.storyId);
+            }); // hoặc gọi API phù hợp với data của bạn
+            // refresh lại subTask nếu cần
+        } catch (error) {
+            console.error('Failed to update name:', error);
+        }
+    };
     const getTaskByStory = (id) => {
         const PostData = async () => {
             try {
@@ -65,6 +144,7 @@ export const TaskDetailModal = ({ task, onClose }) => {
         };
         PostData();
     };
+
     const handleSubmid = async () => {
         const tasks = {
             storyId: task?.storyId,
@@ -88,6 +168,24 @@ export const TaskDetailModal = ({ task, onClose }) => {
                 toast.error('An error occurred during sign up. Please try again.');
             });
     };
+    const GetUserByProject = async () => {
+        try {
+            await apis
+                .getUseByProject()
+                .then((res) => {
+                    setUser(res.data.data);
+                })
+                .catch((error) => {
+                    console.error('Registration error: ', error);
+                    toast.error('An error occurred during sign up. Please try again.');
+                });
+        } catch (error) {
+            toast.error('An error occurred during sign up. Please try again.');
+        }
+    };
+    useEffect(() => {
+        GetUserByProject();
+    }, []);
     const getUser = (id) => {
         const PostData = async () => {
             try {
@@ -169,6 +267,40 @@ export const TaskDetailModal = ({ task, onClose }) => {
                 return 'bg-gray-200';
         }
     }
+    const handleUserSelect = (userId, data) => {
+        console.log(userId);
+        const PostData = async () => {
+            try {
+                const update = {
+                    storyId: data.storyId,
+                    assignedTo: userId,
+                    name: data?.name,
+                    description: data.description,
+                    statusId: data?.statusId,
+                    estimatedHours: data.estimatedHours,
+                    loggedHours: data?.loggedHours,
+                    remainingHours: data?.remainingHours,
+                };
+
+                await apis
+                    .editTask(data.taskId, update)
+                    .then((res) => {
+                        update(true);
+                        getTaskByStory(task?.storyId);
+                        setShowAssigneeSelect(false);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowAssigneeSelect(false);
+    };
+
     return (
         <Dialog open={!!task} onClose={onClose} className="relative z-50">
             {/* Overlay */}
@@ -189,9 +321,8 @@ export const TaskDetailModal = ({ task, onClose }) => {
                         {/* Header */}
                         <div className="  pt-6 pb-3">
                             <div className="text-xl text-gray-500 mb-2">
-                                <span className="text-purple-600 font-medium">⚡ NHOM4-25</span> /{' '}
                                 <span className={`font-medium ${isBug ? 'text-red-500' : 'text-blue-500'}`}>
-                                    {isBug ? '🐞' : '📘'} NHOM4-{taskId}
+                                    {isBug ? '🐞' : '📘'} {projectName} - {taskId}
                                 </span>
                             </div>
                         </div>
@@ -200,9 +331,30 @@ export const TaskDetailModal = ({ task, onClose }) => {
                     {/* Body */}
                     <div className="flex max-h-full overflow-y-auto w-full h-5/6">
                         <div className="w-1/2">
-                            <h2 className="text-4xl font-semibold py-4 rounded-b hover:bg-neutral-100 px-3 ">
-                                {task?.name || task?.title}
-                            </h2>
+                            <div className="">
+                                {isEditingTitle ? (
+                                    <input
+                                        value={editedTitle}
+                                        onChange={(e) => setEditedTitle(e.target.value)}
+                                        onBlur={handleUpdateTitle}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') handleUpdateTitle();
+                                        }}
+                                        autoFocus
+                                        className="mt-2 w-full text-2xl font-bold text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                                    />
+                                ) : (
+                                    <h1
+                                        onClick={() => {
+                                            setIsEditingTitle(true);
+                                            setEditedTitle(task?.name || task?.title);
+                                        }}
+                                        className=" text-2xl font-bold text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                                    >
+                                        {task?.name || task?.title}
+                                    </h1>
+                                )}
+                            </div>
                             <div className="py-2">
                                 <span
                                     onClick={() => setIsShowSubTask(true)}
@@ -228,86 +380,179 @@ export const TaskDetailModal = ({ task, onClose }) => {
                             {/* Subtasks */}
                             {subTask.length > 0 && (
                                 <div className="border rounded-xl mt-5">
-                                    <table className="border-collapse ">
-                                        <thead className="sticky top-0 z-10">
-                                            <tr>
-                                                <th className="p-3 border-b border-r border-gray-300 text-sm text-center">
-                                                    Type
-                                                </th>
-                                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
-                                                    Key
-                                                </th>
-                                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
-                                                    Summary
-                                                </th>
-                                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
-                                                    Priority
-                                                </th>
-                                                <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
-                                                    Status
-                                                </th>
-                                                <th className="p-3 border-b border-r border-gray-200 text-sm text-left">
-                                                    Sprint
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {subTask.map((data, index) => (
-                                                <tr key={index} className="group hover:bg-neutral-100 h-[40px]">
-                                                    <td className="relative w-[110px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                                                        <div className="flex items-center justify-center gap-2">
-                                                            <div className="w-4 text-blue-500  text-lg">
-                                                                <i className="fas fa-check-square" />
-                                                            </div>
+                                    <div className="overflow-x-auto overflow-y-auto h-[200px] max-h-[200px] shadow">
+                                        <table className="border-collapse ">
+                                            <thead className="sticky top-0 z-10">
+                                                <tr>
+                                                    <th className="p-3 border-b border-r border-gray-300 text-sm text-center">
+                                                        Type
+                                                    </th>
+                                                    <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
+                                                        Key
+                                                    </th>
+                                                    <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
+                                                        Summary
+                                                    </th>
 
-                                                            <div className="w-4 ">
-                                                                <button
-                                                                    title="Create child work item"
-                                                                    className="hidden group-hover:inline-flex text-2xl text-gray-400 hover:text-gray-500"
-                                                                >
-                                                                    <i className="fas fa-plus" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                                        <FontAwesomeIcon
-                                                            icon={faDiagramSuccessor}
-                                                            style={{ color: '#31a3d3' }}
-                                                        />
-                                                    </td>
-                                                    <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                                                        {data.name}
-                                                    </td>
-                                                    <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b cursor-pointer border-r border-gray-300 text-left">
-                                                        <span className="inline-block font-semibold text-xl flex gap-2 items-center  rounded">
-                                                            {getPriorityIcon(priority[data?.priorityId])}
-                                                            <span>{priority[data?.priorityId]}</span>
-                                                        </span>
-                                                    </td>
-                                                    <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b cursor-pointer border-r border-gray-300 text-left">
-                                                        <span className="inline-block bg-gray-300 text-gray-900 font-semibold text-lg  rounded">
-                                                            {status[data.statusId]}
-                                                        </span>
-                                                    </td>
-
-                                                    <td className="px-4 w-[180px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                                                        {!!data?.assignedTo && data?.assignedTo !== '' ? (
-                                                            <div
-                                                                className={`relative w-10 h-10 rounded-full  ${getColorFromName(
-                                                                    data?.assignedTo,
-                                                                )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
-                                                            ></div>
-                                                        ) : (
-                                                            <div className="w-8 h-8 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center">
-                                                                <i className="fas fa-user"></i>
-                                                            </div>
-                                                        )}
-                                                    </td>
+                                                    <th className="p-3 border-b border-r border-gray-300 text-sm text-left">
+                                                        Status
+                                                    </th>
+                                                    <th className="p-3 border-b border-r border-gray-200 text-sm text-left">
+                                                        Assignee
+                                                    </th>
                                                 </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                {subTask.map((data, index) => (
+                                                    <tr key={index} className="group hover:bg-neutral-100 h-[40px]">
+                                                        <td className="relative w-[110px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                                                            <div className="flex items-center justify-center gap-2">
+                                                                <div className="w-4 text-blue-500  text-lg">
+                                                                    <i className="fas fa-check-square" />
+                                                                </div>
+
+                                                                <div className="w-4 ">
+                                                                    <button
+                                                                        title="Create child work item"
+                                                                        className="hidden group-hover:inline-flex text-2xl text-gray-400 hover:text-gray-500"
+                                                                    >
+                                                                        <i className="fas fa-plus" />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
+                                                            <FontAwesomeIcon
+                                                                icon={faDiagramSuccessor}
+                                                                style={{ color: '#31a3d3' }}
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 max-w-[300px] w-[200px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
+                                                            {editingIndex === index ? (
+                                                                <input
+                                                                    type="text"
+                                                                    value={editedName}
+                                                                    onChange={(e) => setEditedName(e.target.value)}
+                                                                    onBlur={() => {
+                                                                        handleUpdateName(data, editedName);
+                                                                        setEditingIndex(null);
+                                                                    }}
+                                                                    onKeyDown={(e) => {
+                                                                        if (e.key === 'Enter') {
+                                                                            handleUpdateName(data, editedName);
+                                                                            setEditingIndex(null);
+                                                                        }
+                                                                    }}
+                                                                    autoFocus
+                                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-gray-800"
+                                                                />
+                                                            ) : (
+                                                                <div
+                                                                    onClick={() => {
+                                                                        setEditedName(data.name);
+                                                                        setEditingIndex(index);
+                                                                    }}
+                                                                    className="cursor-pointer w-full"
+                                                                >
+                                                                    {data.name}
+                                                                </div>
+                                                            )}
+                                                        </td>
+
+                                                        <td className="px-4 w-[120px]  overflow-hidden whitespace-nowrap text-ellipsis border-b cursor-pointer border-r border-gray-300 text-left">
+                                                            <select
+                                                                onChange={(e) => handleChangeStatus(e, data)}
+                                                                value={data.statusId}
+                                                                class="text-lg font-semibold inline-block bg-gray-300 text-gray-900 rounded focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500  cursor-pointer"
+                                                                aria-label="Status"
+                                                            >
+                                                                <option value={1}>To Do</option>
+                                                                <option value={2}>IN PROGRESS</option>
+                                                                <option value={3}>IN REVIEW</option>
+                                                                <option value={4}>DONE</option>
+                                                            </select>
+                                                        </td>
+
+                                                        <td className="px-4 w-[180px]   whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+                                                            {/* Assignee Avatar */}
+                                                            <div
+                                                                onClick={() =>
+                                                                    setShowAssigneeIndex(
+                                                                        showAssigneeIndex === index ? null : index,
+                                                                    )
+                                                                }
+                                                                className="relative cursor-pointer"
+                                                            >
+                                                                {user.find((u) => u.userId === data.assignedTo)
+                                                                    ?.userName?.[0] ? (
+                                                                    <div
+                                                                        ref={dropdownRef}
+                                                                        onClick={() => {
+                                                                            setShowAssigneeSelect((prev) => !prev);
+                                                                        }}
+                                                                        title={`Assignee: ${
+                                                                            user.find(
+                                                                                (u) => u.userId === data.assignedTo,
+                                                                            )?.userName?.[0]
+                                                                        }`}
+                                                                        className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                                                            user.find(
+                                                                                (u) => u.userId === data.assignedTo,
+                                                                            )?.userName?.[0],
+                                                                        )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                                                                    >
+                                                                        {getInitials(
+                                                                            user.find(
+                                                                                (u) => u.userId === data.assignedTo,
+                                                                            )?.userName?.[0],
+                                                                        )}
+                                                                    </div>
+                                                                ) : (
+                                                                    <div
+                                                                        className="w-9 h-9 rounded-full bg-gray-300 text-white font-bold flex items-center justify-center"
+                                                                        title="Click to assign user"
+                                                                    >
+                                                                        <i className="fas fa-user"></i>
+                                                                    </div>
+                                                                )}
+                                                                {showAssigneeIndex === index && (
+                                                                    <div className="absolute top-10 right-0 z-50 w-72 py-2 bg-white shadow-md border rounded text-sm">
+                                                                        <div
+                                                                            onClick={() => handleUserSelect(null, data)}
+                                                                            className="hover:bg-gray-100 flex items-center gap-2 px-4 py-2 cursor-pointer"
+                                                                        >
+                                                                            <div className="w-7 h-7 rounded-full bg-neutral-300 flex items-center justify-center">
+                                                                                <i className="fas fa-user" />
+                                                                            </div>
+                                                                            <span className="text-gray-700">
+                                                                                Unassign
+                                                                            </span>
+                                                                        </div>
+                                                                        {user.map((u) => (
+                                                                            <div
+                                                                                key={u.userId}
+                                                                                onClick={() =>
+                                                                                    handleUserSelect(u.userId, data)
+                                                                                }
+                                                                                className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                                            >
+                                                                                <div className="w-7 h-7 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">
+                                                                                    {u.userName[0]}
+                                                                                </div>
+                                                                                <span className="text-gray-700">
+                                                                                    {u.userName}
+                                                                                </span>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             )}
                             {isShowSubTask && (

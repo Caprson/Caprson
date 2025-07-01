@@ -11,7 +11,10 @@ function TableRow({ row, update }) {
     const [showAssignee, setShowAssignee] = useState(false);
     const [showAssigneeSelect, setShowAssigneeSelect] = useState(false);
     const [user, setUser] = useState([]);
-
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
+    const [isEditingDescript, setIsEditingDescript] = useState(false);
+    const [editedDescript, setEditedDescript] = useState('');
     const dropdownRef = useRef(null);
     const status = {
         1: 'TO DO',
@@ -30,25 +33,25 @@ function TableRow({ row, update }) {
         3: 'High',
         4: 'Highest',
     };
-        function getPriorityIcon(priority) {
-            switch (priority) {
-                case 'Highest':
-                    return (
-                        <span className="text-red-500 text-sm">
-                            <FaChevronUp />
-                            <FaChevronUp className="-mt-2" />
-                        </span>
-                    );
-                case 'High':
-                    return <FaChevronUp className="text-red-400 text-sm" />;
-                case 'Medium':
-                    return <FaEquals className="text-gray-500 text-sm" />;
-                case 'Low':
-                    return <FaChevronDown className="text-blue-400 text-sm" />;
-                default:
-                    return null;
-            }
+    function getPriorityIcon(priority) {
+        switch (priority) {
+            case 'Highest':
+                return (
+                    <span className="text-red-500 text-sm">
+                        <FaChevronUp />
+                        <FaChevronUp className="-mt-2" />
+                    </span>
+                );
+            case 'High':
+                return <FaChevronUp className="text-red-400 text-sm" />;
+            case 'Medium':
+                return <FaEquals className="text-gray-500 text-sm" />;
+            case 'Low':
+                return <FaChevronDown className="text-blue-400 text-sm" />;
+            default:
+                return null;
         }
+    }
     const firstItemRef = useRef(null);
 
     useEffect(() => {
@@ -240,6 +243,105 @@ function TableRow({ row, update }) {
         PostData();
         setShowStatus(false);
     };
+    const handleUpdateTitle = async () => {
+        if (!editedTitle.trim()) return;
+        try {
+            let matchedType = null;
+
+            // Xác định type từ row
+            if ('title' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'bug');
+            } else if ('epicId' in row && 'sprintId' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'stories');
+            } else if ('startDate' in row && 'endDate' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'epic');
+            }
+
+            if (!matchedType) {
+                toast.error('Không xác định được loại dữ liệu để cập nhật');
+                return;
+            }
+
+            const built = matchedType.buildPayload(row);
+            const payload = {
+                ...built,
+                ...(built.name !== undefined
+                    ? { name: editedTitle || built.name }
+                    : { title: editedTitle || built.title }),
+            };
+
+            if (matchedType.type === 'epic') {
+                await apis.editEpic(row?.epicId, payload);
+            } else if (matchedType.type === 'stories') {
+                await apis
+                    .editUserStore(row?.storyId, payload)
+                    .then((res) => {
+                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+                        setShowAssigneeSelect(false);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } else if (matchedType.type === 'bug') {
+                await apis.editBug(row?.bugId, payload);
+            }
+            update(true);
+            setIsEditingTitle(false);
+        } catch (err) {
+            console.error('Failed to update title:', err);
+        }
+    };
+    const handleUpdateDescript = async () => {
+        if (!editedDescript.trim()) return;
+        try {
+            let matchedType = null;
+
+            // Xác định type từ row
+            if ('title' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'bug');
+            } else if ('epicId' in row && 'sprintId' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'stories');
+            } else if ('startDate' in row && 'endDate' in row) {
+                matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'epic');
+            }
+
+            if (!matchedType) {
+                toast.error('Không xác định được loại dữ liệu để cập nhật');
+                return;
+            }
+
+            const built = matchedType.buildPayload(row);
+            const payload = {
+                ...built,
+                ...(built.description !== undefined
+                    ? { description: editedDescript|| built.description }
+                    : { comment: editedDescript || built.comment }),
+            };
+
+            if (matchedType.type === 'epic') {
+                await apis.editEpic(row?.epicId, payload);
+            } else if (matchedType.type === 'stories') {
+                await apis
+                    .editUserStore(row?.storyId, payload)
+                    .then((res) => {
+                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+                        setShowAssigneeSelect(false);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } else if (matchedType.type === 'bug') {
+                await apis.editBug(row?.bugId, payload);
+            }
+            update(true);
+            setIsEditingDescript(false);
+        } catch (err) {
+            console.error('Failed to update title:', err);
+            setIsEditingDescript(false);
+        }
+    };
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -355,7 +457,30 @@ function TableRow({ row, update }) {
                 {row.storyId || row.epicId}
             </td>
             <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                {row.name || row.title}
+                <div className="">
+                    {isEditingTitle ? (
+                        <input
+                            value={editedTitle}
+                            onChange={(e) => setEditedTitle(e.target.value)}
+                            onBlur={handleUpdateTitle}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdateTitle();
+                            }}
+                            autoFocus
+                            className="mt-2 w-full text-xl  text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                        />
+                    ) : (
+                        <h1
+                            onClick={() => {
+                                setIsEditingTitle(true);
+                                setEditedTitle(row?.name || row?.title);
+                            }}
+                            className=" text-xl text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                        >
+                            {row?.name || row?.title}
+                        </h1>
+                    )}
+                </div>
             </td>
             <td className="px-4 w-[120px] relative   whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left">
                 <div
@@ -390,13 +515,43 @@ function TableRow({ row, update }) {
                     </div>
                 )}
             </td>
-            <td className="px-4 w-[145px]  overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500">
+            <td
+                title={row?.description || row?.comment}
+                className="px-4 max-w-[250px] overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500"
+            >
                 {row?.description !== '' || row?.comment !== '' ? (
-                    <span>{row?.description || row?.comment}</span>
+                    isEditingDescript ? (
+                        <input
+                            value={editedDescript}
+                            onChange={(e) => setEditedDescript(e.target.value)}
+                            onBlur={handleUpdateDescript}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleUpdateDescript();
+                            }}
+                            autoFocus
+                            className="mt-2 w-full text-xl text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                        />
+                    ) : (
+                        <h1
+                            onClick={() => {
+                                setIsEditingDescript(true);
+                                setEditedDescript(row?.description || row?.comment);
+                            }}
+                            className="text-xl text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                        >
+                            {row?.description || row?.comment}
+                        </h1>
+                    )
                 ) : (
-                    <div>
+                    <div
+                        onClick={() => {
+                            setIsEditingDescript(true);
+                            setEditedDescript('');
+                        }}
+                        className="cursor-pointer hover:bg-neutral-100 px-2 py-1 rounded inline-flex items-center gap-2"
+                    >
                         <i className="far fa-comment-alt text-lg" />
-                        <span>Add comment</span>
+                        <span className="text-sm text-gray-500">Add comment</span>
                     </div>
                 )}
             </td>
@@ -479,10 +634,12 @@ function TableRow({ row, update }) {
                 )}
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
-                {!!row.priorityId && <div className='flex items-center gap-2'>
-                    <span>{getPriorityIcon(priority[row.priorityId])}</span>
-                    <span>{priority[row.priorityId]}</span>
-                </div> }
+                {!!row.priorityId && (
+                    <div className="flex items-center gap-2">
+                        <span>{getPriorityIcon(priority[row.priorityId])}</span>
+                        <span>{priority[row.priorityId]}</span>
+                    </div>
+                )}
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.createdAt && formatDate(row.createdAt)}
@@ -492,15 +649,13 @@ function TableRow({ row, update }) {
             </td>
             <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.createdBy && (
-                    <div className='flex -items-center gap-2'>
+                    <div className="flex -items-center gap-2">
                         <div
-                          
-                            
                             title={`Assignee: ${userReport?.userName}`}
                             className={` w-10 h-10 rounded-full  ${getColorFromName(
                                 userReport?.userName,
                             )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
-                        >   
+                        >
                             {getInitials(userReport.userName)}
                         </div>
                         <span className="font-semibold text-lg text-gray-600">{userReport.email}</span>

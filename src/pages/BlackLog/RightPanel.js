@@ -27,6 +27,9 @@ function RightPanel({ item, update }) {
     const dispatch = useDispatch();
     const projectName = localStorage.getItem('projectName');
     const dropdownRef = useRef(null);
+    const inputRef= useRef(null);
+    const [isEditingTitle, setIsEditingTitle] = useState(false);
+    const [editedTitle, setEditedTitle] = useState('');
     const priority = {
         1: 'Low',
         2: 'Medium',
@@ -46,27 +49,61 @@ function RightPanel({ item, update }) {
         if (!newName.trim()) return;
         try {
             const payload = {
-                    storyId: data.storyId,
-                    assignedTo: data?.assignedTo,
-                    name: newName,
-                    description: data.description,
-                    statusId: data?.statusId,
-                    estimatedHours: data.estimatedHours,
-                    loggedHours: data?.loggedHours,
-                    remainingHours: data?.remainingHours,
-                };;
-            await apis.editTask(data.taskId, payload)
-            .then(()=>{
-                  getTaskByStory(userStory.storyId);
+                storyId: data.storyId,
+                assignedTo: data?.assignedTo,
+                name: newName,
+                description: data.description,
+                statusId: data?.statusId,
+                estimatedHours: data.estimatedHours,
+                loggedHours: data?.loggedHours,
+                remainingHours: data?.remainingHours,
+            };
+            await apis.editTask(data.taskId, payload).then(() => {
+                getTaskByStory(userStory.storyId);
             }); // hoặc gọi API phù hợp với data của bạn
             // refresh lại subTask nếu cần
         } catch (error) {
             console.error('Failed to update name:', error);
         }
     };
+    const handleUpdateTitle = async () => {
+        if (!editedTitle.trim()) return;
+        try {
+            const payload = {
+                epicId: userStory?.epicId,
+                sprintId: userStory?.sprintId,
+                name: editedTitle,
+                description: userStory?.description,
+                priorityId: userStory?.priorityId,
+                assignedTo: userStory?.assignedTo,
+                statusId: userStory?.statusId,
+            };
+            await apis.editUserStore(userStory.storyId, payload).then(() => {
+                update(true);
+                getUserStoryById(item);
+                getTaskByStory(item);
+            });
+            // Optionally reload or update local state
+            setIsEditingTitle(false);
+        } catch (err) {
+            console.error('Failed to update title:', err);
+        }
+    };
     useEffect(() => {
         function handleClickOutside(event) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowAssigneeSelect(false);
+            }
+        }
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (inputRef.current && !inputRef.current.contains(event.target)) {
                 setShowAssigneeSelect(false);
             }
         }
@@ -373,7 +410,31 @@ function RightPanel({ item, update }) {
                     </button>
                 </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-600">{userStory?.name}</h1>
+           <div className=''>
+             {isEditingTitle ? (
+                <input
+                    ref={inputRef}
+                    value={editedTitle}
+                    onChange={(e) => setEditedTitle(e.target.value) }
+                    onBlur={handleUpdateTitle}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleUpdateTitle();
+                    }}
+                    autoFocus
+                    className="mt-2 w-full text-2xl font-bold text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                />
+            ) : (
+                <h1
+                    onClick={() => {
+                        setIsEditingTitle(true)
+                        setEditedTitle(userStory?.name)
+                    }}
+                    className=" text-2xl font-bold text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                >
+                    {userStory?.name}
+                </h1>
+            )}
+           </div>
             <button
                 onClick={() => setIsShowSubTask(true)}
                 class="border border-solid border-gray-300 rounded-md px-3 py-1 text-xl font-normal hover:bg-gray-100 flex items-center space-x-1 w-max"
