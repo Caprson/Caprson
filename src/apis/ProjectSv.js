@@ -141,6 +141,23 @@ export const editEpic = (id, datas) =>
             reject(error);
         }
     });
+export const editTask = (id, datas) =>
+    new Promise(async (resolve, reject) => {
+        try {
+            const response = await axios({
+                url: `projects/tasks/${id} `,
+                method: 'put',
+                withCredentials: true,
+                data: datas,
+                headers: {
+                    'X-Project-Id': localStorage.getItem('projectId'),
+                },
+            });
+            resolve(response);
+        } catch (error) {
+            reject(error);
+        }
+    });
 export const editBug = (id, datas) =>
     new Promise(async (resolve, reject) => {
         try {

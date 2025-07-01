@@ -227,7 +227,7 @@ export const TaskDetailModal = ({ task, onClose }) => {
 
                             {/* Subtasks */}
                             {subTask.length > 0 && (
-                                <div className="border rounded-xl">
+                                <div className="border rounded-xl mt-5">
                                     <table className="border-collapse ">
                                         <thead className="sticky top-0 z-10">
                                             <tr>

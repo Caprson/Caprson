@@ -24,6 +24,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
     const [showEpic, setShowEpic] = useState(false);
     const [user, setUser] = useState([]);
     const [userAssignee, setUserAssignee] = useState({});
+    const [userAssignees, setUserAssignees] = useState({});
     const [epics, setEpics] = useState([]);
     const [epic, setEpic] = useState({});
     const [subTask, setSubTask] = useState([]);
@@ -73,6 +74,32 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
         setShowDropdown((prev) => !prev);
     };
 
+    useEffect(() => {
+        const fetchAssignees = async () => {
+            const promises = subTask
+                .filter((item) => item.assignedTo)
+                .map(async (item) => {
+                    try {
+                        const res = await apis.getUseById(item.assignedTo);
+                        return { id: item.assignedTo, user: res.data.data };
+                    } catch (error) {
+                        console.error('Failed to fetch user', error);
+                        return null;
+                    }
+                });
+
+            const results = await Promise.all(promises);
+            const usersMap = {};
+            results.forEach((entry) => {
+                if (entry && entry.id) usersMap[entry.id] = entry.user;
+            });
+            setUserAssignees(usersMap);
+        };
+
+        if (subTask.length > 0) {
+            fetchAssignees();
+        }
+    }, [subTask]);
     const handlePrioritySelect = (priorityId) => {
         console.log(priorityId);
         const PostData = async () => {
@@ -280,7 +307,6 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                     .then((res) => {
                         if (update.assignedTo !== null) getUser(update?.assignedTo);
 
-                       
                         updateData(true);
                         setShowAssigneeSelect(false);
                     })
@@ -459,7 +485,7 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                 await apis
                     .deleteTask(id)
                     .then((res) => {
-                        getTaskByStory(item?.storyId)
+                        getTaskByStory(item?.storyId);
                     })
                     .catch((error) => {
                         console.error('Registration error: ', error);
@@ -507,7 +533,10 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             onClick={stopDrag}
                         />
                         <span className="text-xl text-gray-900">
-                            <span className="font-semibold">{projectName} - {item?.storyId}</span> {name}
+                            <span className="font-semibold">
+                                {projectName} - {item?.storyId}
+                            </span>{' '}
+                            {name}
                         </span>
                     </div>
                     <div className="flex relative items-center space-x-3">
@@ -597,13 +626,13 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                 </div>
                             )}
                         </div>
-                       
+
                         <div className="relative " ref={dropdownPriority}>
-                            <div className='flex items-center w-[60px]'>
+                            <div className="flex items-center w-[60px]">
                                 <button onClick={handlePriorityClick} className="text-orange-600 text-xl px-2">
-                                {getPriorityIcon(priority[item.priorityId])}
-                            </button >
-                            <span className='font-medium text-lg '>{priority[item.priorityId]}</span>
+                                    {getPriorityIcon(priority[item.priorityId])}
+                                </button>
+                                <span className="font-medium text-lg ">{priority[item.priorityId]}</span>
                             </div>
 
                             {showDropdown && (
@@ -760,28 +789,8 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                             + Epic
                                         </button>
                                     )}
-                                    {/* {showEpic && (
-                                        <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                            {epics.map((data, index) => (
-                                                <div
-                                                    key={index}
-                                                    ref={index === 0 ? firstItemRef : null}
-                                                    tabIndex={-1}
-                                                    onClick={() => handleSelectEpic(data.epicId)}
-                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <div className="text-purple-300">
-                                                        <i className="fas fa-bolt"></i>
-                                                    </div>
-                                                    <div className="p-1 rounded-lg flex items-center text-lg font-bold">
-                                                        {data.name}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )} */}
                                 </div>
-                                <div className="relative w-[110px] " >
+                                <div className="relative w-[110px] ">
                                     <button
                                         onClick={(e) => {
                                             stopDrag(e);
@@ -822,76 +831,26 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                                     -
                                 </button>
                                 <button onClick={stopDrag} className="text-orange-600 w-[40px] text-xl px-2">
-                                    {getPriorityIcon(priority[item.priorityId])}
+                                    {getPriorityIcon(priority[data.priorityId])}
                                 </button>
 
-                                {item != undefined && !!item.assignedTo ? (
+                                {data.assignedTo ? (
                                     <div
-                                        
-                                        onClick={(e) => {
-                                            stopDrag(e);
-                                        }}
-                                        title={`Assignee: ${userAssignee?.userName}`}
-                                        className={`relative w-10 h-10 rounded-full  ${getColorFromName(
-                                            userAssignee?.userName,
-                                        )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                                        title={`Assignee: ${userAssignees[data.assignedTo]?.userName}`}
+                                        onClick={(e) => stopDrag(e)}
+                                        className={`relative w-10 h-10 rounded-full ${getColorFromName(
+                                            userAssignees[data.assignedTo]?.userName,
+                                        )} cursor-pointer text-white font-bold flex items-center justify-center text-sm`}
                                     >
-                                        {/* Avatar gồm nhiều chữ cái với màu riêng */}
-                                        {getInitialsElements(userAssignee?.userName)}
-
-                                        {/* {showAssigneeSelect && (
-                                            <div className="absolute top-10 right-0 z-50 w-96 py-3  bg-white shadow-md border rounded text-lg overflow-hidden">
-                                                <div
-                                                    onClick={() => handleUserSelect(null)}
-                                                    className="hover:bg-gray-100 flex items-center gap-2 px-4 py-3 cursor-pointer"
-                                                >
-                                                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-neutral-300">
-                                                        <i className="fas fa-user"></i>
-                                                    </div>
-                                                    <span className="text-gray-700">Un Assignee</span>
-                                                </div>
-                                                {user.map((data) => (
-                                                    <div
-                                                        key={data.userId}
-                                                        onClick={() => handleUserSelect(data.userId)}
-                                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                    >
-                                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                            {getInitials(data.userName)}
-                                                        </div>
-                                                        <span className="text-gray-700">{data.userName}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )} */}
+                                        {getInitialsElements(userAssignees[data.assignedTo]?.userName)}
                                     </div>
                                 ) : (
                                     <div
-                                     
-                                        onClick={(e) => {
-                                            stopDrag(e);
-                                        }}
+                                        onClick={(e) => stopDrag(e)}
                                         title="Click to assign user"
                                         className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center"
                                     >
                                         <i className="fas fa-user"></i>
-
-                                        {/* {showAssigneeSelect && (
-                                            <ul className="absolute top-10 right-0 z-50 w-96 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                                {user.map((data) => (
-                                                    <li
-                                                        key={data.userId}
-                                                        onClick={() => handleUserSelect(data.userId)}
-                                                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                                    >
-                                                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-lg font-bold bg-orange-500">
-                                                            {getInitials(data.userName)}
-                                                        </div>
-                                                        <span className="text-gray-700 font-bold">{data.userName}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )} */}
                                     </div>
                                 )}
 
@@ -977,7 +936,7 @@ function SprintColumn({ id, taskSprint, items, isUpda, renderTask }) {
         };
         PostData();
     };
-        const formatDate = (dateString) => {
+    const formatDate = (dateString) => {
         const date = new Date(dateString);
         return new Intl.DateTimeFormat('en-GB', {
             day: 'numeric',
@@ -1006,10 +965,9 @@ function SprintColumn({ id, taskSprint, items, isUpda, renderTask }) {
                         <i className="fas fa-chevron-down text-gray-600"></i>
                         <span id={`${taskSprint?.sprintId}-heading`}>{taskSprint?.name}</span>
                     </button>
-                    <div className='flex gap-3 items-center'>
-                        <span className="text-gray-500 text-xl">{formatDate(taskSprint?.startDate)}</span>
-                    -
-                    <span className="text-gray-500 text-xl">{formatDate(taskSprint?.endDate)}</span>
+                    <div className="flex gap-3 items-center">
+                        <span className="text-gray-500 text-xl">{formatDate(taskSprint?.startDate)}</span>-
+                        <span className="text-gray-500 text-xl">{formatDate(taskSprint?.endDate)}</span>
                     </div>
                 </div>
                 <div className="flex items-center space-x-3">
@@ -1400,7 +1358,7 @@ function BlackLog() {
                     </DndContext>
                 </div>
                 {isShowRightPanel ? (
-                    <RightPanel key={detail.storyId} item={detail.storyId}  update={setIsUpdate} />
+                    <RightPanel key={detail.storyId} item={detail.storyId} update={setIsUpdate} />
                 ) : (
                     <></>
                 )}
