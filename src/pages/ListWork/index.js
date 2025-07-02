@@ -102,9 +102,9 @@ function ListWork() {
                 await apis
                     .createUserStore(selectedType.type, payload)
                     .then((res) => {
-                        console.log(res);
                         SetUserStore({ ...userStore, name: '' });
                         setIsCreating(false);
+                         GetAllTypeProject();
                     })
                     .catch((error) => {
                         console.error('Registration error: ', error);
@@ -116,6 +116,7 @@ function ListWork() {
                     .then((res) => {
                         SetUserStore({ ...userStore, name: '' });
                         setIsCreating(false);
+                           GetAllTypeProject();
                     })
                     .catch((error) => {
                         console.error('Registration error: ', error);

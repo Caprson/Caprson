@@ -4,7 +4,7 @@ import { TaskDetailModal } from './TaskDetailModal';
 import { useState } from 'react';
 
 export function Column({ column }) {
-    const { setNodeRef } = useDroppable({ id: column.id });
+    const { setNodeRef } = useDroppable({ id: `column-${column.id}` });
      const [selectedTask, setSelectedTask] = useState(null);
      
     return (

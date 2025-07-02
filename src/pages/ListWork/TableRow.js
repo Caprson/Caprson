@@ -144,7 +144,7 @@ function TableRow({ row, update }) {
         PostData();
     };
     useEffect(() => {
-        if (row.assignedTo !== undefined || row.assignedTo !== '') getUser(row.assignedTo);
+        if (row.assignedTo !== undefined && row.assignedTo !== '') getUser(row.assignedTo);
         if (!!row.createdBy || row.createdBy !== '') getUserReport(row.createdBy);
         if (!!row.sprintId) getSprint(row.sprintId);
     }, [row]);
@@ -276,7 +276,7 @@ function TableRow({ row, update }) {
                 await apis
                     .editUserStore(row?.storyId, payload)
                     .then((res) => {
-                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+                        if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
                         setShowAssigneeSelect(false);
                     })
                     .catch((error) => {
@@ -325,7 +325,7 @@ function TableRow({ row, update }) {
                 await apis
                     .editUserStore(row?.storyId, payload)
                     .then((res) => {
-                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+                        if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
                         setShowAssigneeSelect(false);
                     })
                     .catch((error) => {
@@ -384,7 +384,7 @@ function TableRow({ row, update }) {
                     await apis
                         .editUserStore(row?.storyId, payload)
                         .then((res) => {
-                            if (update.assignedTo !== null) getUser(update?.assignedTo);
+                            if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
                             setShowAssigneeSelect(false);
                         })
                         .catch((error) => {
@@ -564,9 +564,9 @@ function TableRow({ row, update }) {
             </td>
             <td className="px-4 w-[180px]  relative  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.assignedTo && row.assignedTo !== '' ? (
-                    <div className="flex gap-3 items-center">
+                    <div  ref={dropdownRef} className="flex gap-3 items-center">
                         <div
-                            ref={dropdownRef}
+                           
                             onClick={() => {
                                 setShowAssigneeSelect((prev) => !prev);
                             }}

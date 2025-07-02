@@ -569,22 +569,39 @@ function DraggableTask({ id, index, name, item, updateData, detail }) {
                             )}
                             {showEpic && (
                                 <div className="absolute top-12 right-0 z-50 w-72 py-3 bg-white shadow-md border rounded text-lg overflow-hidden">
-                                    {epics.map((data, index) => (
-                                        <div
-                                            key={index}
-                                            ref={index === 0 ? firstItemRef : null}
-                                            tabIndex={-1}
-                                            onClick={() => handleSelectEpic(data.epicId)}
-                                            className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
-                                        >
-                                            <div className="text-purple-300">
-                                                <i className="fas fa-bolt"></i>
-                                            </div>
-                                            <div className="p-1 rounded-lg flex items-center text-lg font-bold">
-                                                {data.name}
-                                            </div>
+                                    {epics.length > 0 ? (
+                                        <div className="flex flex-col">
+                                            {epics.map((data, index) => (
+                                                <div
+                                                    key={index}
+                                                    ref={index === 0 ? firstItemRef : null}
+                                                    tabIndex={-1}
+                                                    onClick={() => handleSelectEpic(data.epicId)}
+                                                    className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    <div className="text-purple-300">
+                                                        <i className="fas fa-bolt"></i>
+                                                    </div>
+                                                    <div className="p-1 rounded-lg flex items-center text-lg font-bold">
+                                                        {data.name}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                            {epic.epicId === item.epicId && (
+                                                <div
+                                                    onClick={() => handleSelectEpic(null)}
+                                                    className="border-t border-gray-400 flex items-center gap-2 px-4 py-1 font-semibold hover:bg-gray-100 cursor-pointer"
+                                                >
+                                                    Un Link
+                                                </div>
+                                            )}
                                         </div>
-                                    ))}
+                                    ) : (
+                                        <div className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100 cursor-pointer ">
+                                            <i class="fas fa-bolt"></i>
+                                            No Epic
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>

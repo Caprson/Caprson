@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 
 export function Task({ task, onClick }) {
-    const id = task.type === 'bug' ? String(task.bugId) : String(task.storyId);
+    const id = task.type === 'bug' ? `bug-${task.bugId}` : `story-${task.storyId}`;
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
 
     const [user, setUser] = useState({});
@@ -52,7 +52,7 @@ export function Task({ task, onClick }) {
             window.removeEventListener('mouseup', handleMouseUp);
 
             if (!mouseMovedRef.current) {
-                console.log("jsdbasd")
+                console.log('jsdbasd');
                 onClick(task);
             }
 

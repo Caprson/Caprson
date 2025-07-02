@@ -27,7 +27,7 @@ function RightPanel({ item, update }) {
     const dispatch = useDispatch();
     const projectName = localStorage.getItem('projectName');
     const dropdownRef = useRef(null);
-    const inputRef= useRef(null);
+    const inputRef = useRef(null);
     const [isEditingTitle, setIsEditingTitle] = useState(false);
     const [editedTitle, setEditedTitle] = useState('');
     const priority = {
@@ -237,7 +237,7 @@ function RightPanel({ item, update }) {
         PostData();
     };
     useEffect(() => {
-        if (!!userStory && userStory.assignedTo != '') {
+        if (userStory !== null && userStory.assignedTo != '') {
             getUser(userStory?.assignedTo);
         }
         if (userStory.updatedBy != '') getUserRP(userStory?.updatedBy);
@@ -366,7 +366,7 @@ function RightPanel({ item, update }) {
                 await apis
                     .editTask(data.taskId, update)
                     .then((res) => {
-                        if (update.assignedTo !== null) getUser(update?.assignedTo);
+                        if (update.assignedTo !== null && update.assignedTo !== '') getUser(update?.assignedTo);
 
                         update(true);
                         getTaskByStory(userStory.storyId);
@@ -410,31 +410,31 @@ function RightPanel({ item, update }) {
                     </button>
                 </div>
             </div>
-           <div className=''>
-             {isEditingTitle ? (
-                <input
-                    ref={inputRef}
-                    value={editedTitle}
-                    onChange={(e) => setEditedTitle(e.target.value) }
-                    onBlur={handleUpdateTitle}
-                    onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleUpdateTitle();
-                    }}
-                    autoFocus
-                    className="mt-2 w-full text-2xl font-bold text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
-                />
-            ) : (
-                <h1
-                    onClick={() => {
-                        setIsEditingTitle(true)
-                        setEditedTitle(userStory?.name)
-                    }}
-                    className=" text-2xl font-bold text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
-                >
-                    {userStory?.name}
-                </h1>
-            )}
-           </div>
+            <div className="">
+                {isEditingTitle ? (
+                    <input
+                        ref={inputRef}
+                        value={editedTitle}
+                        onChange={(e) => setEditedTitle(e.target.value)}
+                        onBlur={handleUpdateTitle}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter') handleUpdateTitle();
+                        }}
+                        autoFocus
+                        className="mt-2 w-full text-2xl font-bold text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                    />
+                ) : (
+                    <h1
+                        onClick={() => {
+                            setIsEditingTitle(true);
+                            setEditedTitle(userStory?.name);
+                        }}
+                        className=" text-2xl font-bold text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                    >
+                        {userStory?.name}
+                    </h1>
+                )}
+            </div>
             <button
                 onClick={() => setIsShowSubTask(true)}
                 class="border border-solid border-gray-300 rounded-md px-3 py-1 text-xl font-normal hover:bg-gray-100 flex items-center space-x-1 w-max"
@@ -721,17 +721,33 @@ function RightPanel({ item, update }) {
                 <div id="details-content" aria-labelledby="details-header" class="space-y-3">
                     <div class="flex items-center gap-12">
                         <span class="w-24 font-medium text-gray-600">Assignee</span>
-                        <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-medium">
-                                {getInitials(userAssignee.userName)}
+                        {userAssignee.userName !== undefined ? (
+                            <div class="flex items-center space-x-2">
+                                <div
+                                    title={`Assignee: ${userAssignee.userName}`}
+                                    className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                        userAssignee.userName,
+                                    )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                                >
+                                    {getInitials(userAssignee.userName)}
+                                </div>
+                                <span>{userAssignee.userName}</span>
                             </div>
-                            <span>{userAssignee.userName}</span>
-                        </div>
+                        ) : (
+                            <div className="relative w-10 h-10 rounded-full bg-gray-300 hover:bg-gray-400 cursor-pointer text-gray-600 flex items-center justify-center">
+                                <i className="fas fa-user"></i>
+                            </div>
+                        )}
                     </div>
                     <div class="flex items-center gap-12">
                         <span class="w-24 font-medium text-gray-600">Reporter</span>
                         <div class="flex items-center space-x-2">
-                            <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white text-sm font-medium">
+                            <div
+                                title={`Assignee: ${userReport.userName}`}
+                                className={`relative w-10 h-10 rounded-full  ${getColorFromName(
+                                    userReport.userName,
+                                )}  cursor-pointer text-white font-bold flex items-center justify-center text-sm gap-0.5`}
+                            >
                                 {getInitials(userReport.userName)}
                             </div>
                             <span>{userReport.userName}</span>

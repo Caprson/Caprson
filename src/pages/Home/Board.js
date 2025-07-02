@@ -19,7 +19,7 @@ const INITIAL_COLUMNS = Object.entries(STATUS_MAP).map(([id, title]) => ({
     tasks: [],
 }));
 
-export function Board() {
+export function Board({selectedUserId,isUpdate,setIsUpdate}) {
     const [columns, setColumns] = useState(INITIAL_COLUMNS);
     const [activeId, setActiveId] = useState(null);
     // Fetch user stories from active sprints
@@ -40,7 +40,12 @@ export function Board() {
             const storiesWithType = allStories.map((s) => ({ ...s, type: 'story' }));
             const bugsWithType = bugData?.data.map((b) => ({ ...b, type: 'bug' })) || [];
 
-            const allItems = [...storiesWithType, ...bugsWithType];
+            let allItems = [...storiesWithType, ...bugsWithType];
+
+            allItems =
+                selectedUserId.length === 0
+                    ? allItems
+                    : allItems.filter((item) => selectedUserId.includes(item.assignedTo));
 
             const groupedByStatus = allItems.reduce((acc, item) => {
                 const key = item.statusId?.toString();
@@ -92,45 +97,63 @@ export function Board() {
     const handleDragEnd = ({ active, over }) => {
         if (!over || active.id === over.id) return;
 
+        const sourceTaskId = active.id; // e.g., 'bug-1' or 'story-5'
+        const overId = over.id;
+
+        // Chỉ xử lý nếu over là column
+        if (!overId.startsWith('column-')) return;
+
+        const destinationColumnId = overId.replace('column-', '');
+        const [type, taskIdStr] = sourceTaskId.split('-');
+        const taskId = parseInt(taskIdStr, 10);
+
         const sourceColumn = columns.find((col) =>
             col.tasks.some((task) => {
-                const id = task.type === 'bug' ? String(task.bugId) : String(task.storyId);
-                return id === active.id;
+                const id = task.type === 'bug' ? `bug-${task.bugId}` : `story-${task.storyId}`;
+                return id === sourceTaskId;
             }),
         );
 
-        const destColumn = columns.find((col) => col.id === over.id);
+        const destColumn = columns.find((col) => String(col.id) === destinationColumnId);
 
         if (!sourceColumn || !destColumn || sourceColumn.id === destColumn.id) return;
 
-        const movingTask = sourceColumn.tasks.find(
-            (t) => (t.type === 'bug' ? String(t.bugId) : String(t.storyId)) === active.id,
-        );
+        const movingTask = sourceColumn.tasks.find((task) => {
+            const id = task.type === 'bug' ? `bug-${task.bugId}` : `story-${task.storyId}`;
+            return id === sourceTaskId;
+        });
 
-        // Update local UI
+        if (!movingTask) return;
+
+        // Cập nhật UI local
         setColumns((prev) =>
             prev.map((col) => {
                 if (col.id === sourceColumn.id) {
                     return {
                         ...col,
-                        tasks: col.tasks.filter(
-                            (t) => (t.type === 'bug' ? String(t.bugId) : String(t.storyId)) !== active.id,
-                        ),
+                        tasks: col.tasks.filter((task) => {
+                            const id = task.type === 'bug' ? `bug-${task.bugId}` : `story-${task.storyId}`;
+                            return id !== sourceTaskId;
+                        }),
                     };
                 }
+
                 if (col.id === destColumn.id) {
                     return {
                         ...col,
-                        tasks: [...col.tasks, { ...movingTask, statusId: parseInt(destColumn.id) }],
+                        tasks: [...col.tasks, { ...movingTask, statusId: Number(destColumn.id) }],
                     };
                 }
+
                 return col;
             }),
         );
 
-        // Update backend
+        // Cập nhật backend
         handleUpdateTask(movingTask, destColumn);
     };
+
+    console.log(columns);
     const handleUpdateTask = async (movingTask, destColumn) => {
         try {
             if (movingTask.type === 'bug') {
@@ -167,7 +190,12 @@ export function Board() {
     useEffect(() => {
         fetchAllUserStories();
     }, []);
-
+    useEffect(()=>{
+        if(isUpdate){
+            setIsUpdate(false)
+            fetchAllUserStories()
+        } 
+    },[isUpdate])
     // Realtime updates via WebSocket
     useUserStoryEvents({
         onCreated: fetchAllUserStories,

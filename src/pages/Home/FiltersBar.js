@@ -1,6 +1,43 @@
+import { useEffect,useState } from 'react';
+import *  as apis from "../../apis"
+import { toast } from 'react-toastify';
 import Icon from './Icon';
 
-function FiltersBar() {
+function FiltersBar({setSelectedUserId,update,selectedUserId}) {
+    const [users,setUsers] = useState([]);
+        function getInitials(name = '') {
+        if (!name) return '';
+        const words = name.trim().split(' ');
+        if (words.length === 1) return words[0][0].toUpperCase();
+        return words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+    }
+    const handleToggleUser = (userId) => {
+        setSelectedUserId(
+            (prev) =>
+                prev.includes(userId)
+                    ? prev.filter((id) => id !== userId) // Xoá nếu đã có
+                    : [...prev, userId], // Thêm nếu chưa có
+        );
+        update(true);
+    };
+        const GetUserByProject = async () => {
+            try {
+                await apis
+                    .getUseByProject()
+                    .then((res) => {
+                        setUsers(res.data.data);
+                    })
+                    .catch((error) => {
+                        console.error('Registration error: ', error);
+                        toast.error('An error occurred during sign up. Please try again.');
+                    });
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        useEffect(()=>{
+            GetUserByProject()
+        },[])
     return (
         <div className=" flex justify-between px-8 mb-4">
             <div className='flex flex-wrap items-center space-x-3'>
@@ -18,24 +55,35 @@ function FiltersBar() {
                     <Icon className="far fa-user-circle text-gray-600" />
                 </button>
                 <div aria-label="User avatars" className="flex -space-x-2" role="list" title="Users">
+                    {users?.map((data, index) => (
                     <div
-                        className="w-9 h-9 rounded-full bg-orange-400 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
-                        title="User H"
+                        key={index}
+                        title={data.userName}
+                        onClick={() => handleToggleUser(data.userId)}
+                        className={`w-12 h-12 rounded-full flex p-1 items-center justify-center cursor-pointer
+                            ${selectedUserId.includes(data.userId) ? 'border-2 border-blue-500' : ''}`}
+                        aria-label={`User initial ${getInitials(data.userName)}`}
                     >
-                        H
+                        <div
+                        className="w-8 h-8 rounded-full bg-orange-500 text-white font-semibold flex items-center justify-center text-xl"
+                        >
+                                
+                            {getInitials(data.userName)}
+                        </div>
                     </div>
+                ))}
+                <div
+                    aria-label="User icon"
+                    title="UnAssignee"
+                    onClick={() => handleToggleUser('')}
+                    class={`w-12 h-12 rounded-full p-1 flex items-center justify-center cursor-pointer ${selectedUserId.includes('')? 'border-2 border-blue-500' : ''}`}
+                >
                     <div
-                        className="w-9 h-9 rounded-full bg-orange-500 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
-                        title="User D"
-                    >
-                        D
+                    className="w-9 h-9 bg-gray-300 text-lg rounded-full flex items-center justify-center">
+
+                        <i class="fas fa-user text-gray-600"></i>
                     </div>
-                    <div
-                        className="w-9 h-9 rounded-full bg-teal-600 text-white text-lg font-semibold flex items-center justify-center ring-2 ring-white"
-                        title="User LD"
-                    >
-                        LD
-                    </div>
+                </div>
                 </div>
                 <button className="border border-gray-300 rounded px-4 py-2 text-xl" type="button">
                     Type
