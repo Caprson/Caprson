@@ -1356,7 +1356,7 @@ function BlackLog() {
                                             value={userStore.name}
                                             onChange={handleChange}
                                             onKeyDown={handleInputKeyPress}
-                                            className="w-full p-2 mt-1 block px-3 py-2 border-solid bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-xl"
+                                            className="w-full p-2 mt-1 block px-3 py-2 border-solid bg-white border border-slate-300 rounded-md text-2xl shadow-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 text-xl"
                                             placeholder="Type task and press Enter"
                                             autoFocus
                                         />

@@ -71,7 +71,7 @@ export const TaskDetailModal = ({ task, onClose }) => {
                     statusId: task?.statusId,
                 };
                 await apis.editUserStore(task?.storyId, payload).then((res) => {
-                    console.log(res)
+                    console.log(res);
                 });
                 // Optionally reload or update local state
                 setIsEditingTitle(false);
@@ -285,7 +285,6 @@ export const TaskDetailModal = ({ task, onClose }) => {
                 await apis
                     .editTask(data.taskId, update)
                     .then((res) => {
-                        update(true);
                         getTaskByStory(task?.storyId);
                         setShowAssigneeSelect(false);
                     })
@@ -518,7 +517,7 @@ export const TaskDetailModal = ({ task, onClose }) => {
                                                                 {showAssigneeIndex === index && (
                                                                     <div className="absolute top-10 right-0 z-50 w-72 py-2 bg-white shadow-md border rounded text-sm">
                                                                         <div
-                                                                            onClick={() => handleUserSelect(null, data)}
+                                                                            onClick={() => handleUserSelect('', data)}
                                                                             className="hover:bg-gray-100 flex items-center gap-2 px-4 py-2 cursor-pointer"
                                                                         >
                                                                             <div className="w-7 h-7 rounded-full bg-neutral-300 flex items-center justify-center">
