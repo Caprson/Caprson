@@ -19,9 +19,9 @@ const INITIAL_COLUMNS = Object.entries(STATUS_MAP).map(([id, title]) => ({
     tasks: [],
 }));
 
-export function Board({selectedUserId,isUpdate,setIsUpdate}) {
+export function Board({ selectedUserId, isUpdate, setIsUpdate }) {
     const [columns, setColumns] = useState(INITIAL_COLUMNS);
-    const [activeId, setActiveId] = useState(null);
+    const [activeId, setActiveId] = useState(false);
     // Fetch user stories from active sprints
     const fetchAllUserStories = async () => {
         try {
@@ -190,19 +190,25 @@ export function Board({selectedUserId,isUpdate,setIsUpdate}) {
     useEffect(() => {
         fetchAllUserStories();
     }, []);
-    useEffect(()=>{
-        if(isUpdate){
-            setIsUpdate(false)
-            fetchAllUserStories()
-        } 
-    },[isUpdate])
+    useEffect(() => {
+        if (isUpdate) {
+            setIsUpdate(false);
+            fetchAllUserStories();
+        }
+    }, [isUpdate]);
+    useEffect(() => {
+        if (activeId) {
+            setActiveId(false);
+            fetchAllUserStories();
+        }
+    }, [activeId]);
     // Realtime updates via WebSocket
     useUserStoryEvents({
         onCreated: fetchAllUserStories,
         onUpdated: fetchAllUserStories,
         onDeleted: fetchAllUserStories,
     });
-
+    console.log(activeId)
     return (
         <div className="max-h-full h-5/6 overflow-x-hidden overflow-y-hidden">
             <div className=" relative h-full flex">
@@ -213,7 +219,7 @@ export function Board({selectedUserId,isUpdate,setIsUpdate}) {
                                 <DndContext onDragEnd={handleDragEnd}>
                                     <div className="grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] h-full gap-4 grid-flow-col">
                                         {columns.map((col) => (
-                                            <Column key={col.id} column={col} />
+                                            <Column isUpdate={activeId} setIsUpdate={setActiveId} key={col.id} column={col} />
                                         ))}
                                     </div>
                                 </DndContext>

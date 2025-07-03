@@ -1,12 +1,12 @@
 import { useDroppable } from '@dnd-kit/core';
 import { Task } from './TaskCard';
 import { TaskDetailModal } from './TaskDetailModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export function Column({ column }) {
+export function Column({ column, setIsUpdate, isUpdate }) {
     const { setNodeRef } = useDroppable({ id: `column-${column.id}` });
-     const [selectedTask, setSelectedTask] = useState(null);
-     
+    const [selectedTask, setSelectedTask] = useState(null);
+    const [updatedTask, setUpdatedTask] = useState(null);
     return (
         <div ref={setNodeRef} className="min-w-[162px] self-auto flex h-full flex-col max-w-full">
             <div className="bg-neutral-100 rounded p-4 min-h-[300px] h-full min-w-[162px] flex flex-col space-y-2 shadow-sm">
@@ -15,12 +15,17 @@ export function Column({ column }) {
                 </h2>
 
                 {column.tasks.length <= 0 ? (
-                    <div className="text-center mt-10 text-gray-700">
-                       
-                    </div>
+                    <div className="text-center mt-10 text-gray-700"></div>
                 ) : (
                     column.tasks.map((task) => (
-                        <Task key={task.storyId || task.bugId} onClick={setSelectedTask} task={{ ...task, type: task.bugId ? 'bug' : 'story' }} />
+                        <Task
+                            key={task.storyId || task.bugId}
+                            isUpdate={isUpdate}
+                            updatedTask={updatedTask}
+                            setIsUpdate={setIsUpdate}
+                            onClick={setSelectedTask}
+                            task={{ ...task, type: task.bugId ? 'bug' : 'story' }}
+                        />
                     ))
                 )}
 
@@ -29,8 +34,16 @@ export function Column({ column }) {
                         + Create
                     </button>
                 )} */}
-                 {/* Modal */}
-            <TaskDetailModal task={selectedTask} onClose={() => setSelectedTask(null)} />
+                {/* Modal */}
+                <TaskDetailModal
+                    updatedTask={updatedTask}
+                    setIsUpdate={setIsUpdate}
+                    setUpdatedTask={setUpdatedTask}
+                    isUpdate={isUpdate}
+                    task={selectedTask}
+                    onClose={() => setSelectedTask(null)}
+                    refreshTask={(task) => setSelectedTask(task)}
+                />
             </div>
         </div>
     );

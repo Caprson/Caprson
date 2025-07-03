@@ -16,6 +16,7 @@ function TableRow({ row, update }) {
     const [isEditingDescript, setIsEditingDescript] = useState(false);
     const [editedDescript, setEditedDescript] = useState('');
     const dropdownRef = useRef(null);
+    const projectName = localStorage.getItem('projectName');
     const status = {
         1: 'TO DO',
         2: 'IN PROGRESS',
@@ -53,7 +54,12 @@ function TableRow({ row, update }) {
         }
     }
     const firstItemRef = useRef(null);
+    const [showDropdown, setShowDropdown] = useState(false);
+    const dropdownPriority = useRef(null);
 
+    const handlePriorityClick = () => {
+        setShowDropdown((prev) => !prev);
+    };
     useEffect(() => {
         function handleClickOutside(event) {
             if (firstItemRef.current && !firstItemRef.current.contains(event.target)) {
@@ -276,7 +282,7 @@ function TableRow({ row, update }) {
                 await apis
                     .editUserStore(row?.storyId, payload)
                     .then((res) => {
-                        if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
+                        if (update.assignedTo !== null && update.assignedTo !== '') getUser(update?.assignedTo);
                         setShowAssigneeSelect(false);
                     })
                     .catch((error) => {
@@ -293,7 +299,6 @@ function TableRow({ row, update }) {
         }
     };
     const handleUpdateDescript = async () => {
-        if (!editedDescript.trim()) return;
         try {
             let matchedType = null;
 
@@ -315,7 +320,7 @@ function TableRow({ row, update }) {
             const payload = {
                 ...built,
                 ...(built.description !== undefined
-                    ? { description: editedDescript|| built.description }
+                    ? { description: editedDescript || built.description }
                     : { comment: editedDescript || built.comment }),
             };
 
@@ -325,7 +330,7 @@ function TableRow({ row, update }) {
                 await apis
                     .editUserStore(row?.storyId, payload)
                     .then((res) => {
-                        if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
+                        if (update.assignedTo !== null && update.assignedTo !== '') getUser(update?.assignedTo);
                         setShowAssigneeSelect(false);
                     })
                     .catch((error) => {
@@ -384,7 +389,7 @@ function TableRow({ row, update }) {
                     await apis
                         .editUserStore(row?.storyId, payload)
                         .then((res) => {
-                            if (update.assignedTo !== null && update.assignedTo!=='') getUser(update?.assignedTo);
+                            if (update.assignedTo !== null && update.assignedTo !== '') getUser(update?.assignedTo);
                             setShowAssigneeSelect(false);
                         })
                         .catch((error) => {
@@ -401,6 +406,54 @@ function TableRow({ row, update }) {
         };
         PostData();
         setShowAssigneeSelect(false);
+    };
+    const handlePrioritySelect = (priorityId) => {
+        const PostData = async () => {
+            try {
+                let matchedType = null;
+
+                // Xác định type từ row
+                if ('title' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'bug');
+                } else if ('epicId' in row && 'sprintId' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'stories');
+                } else if ('startDate' in row && 'endDate' in row) {
+                    matchedType = TYPE_OPTIONS.find((opt) => opt.type === 'epic');
+                }
+
+                if (!matchedType) {
+                    toast.error('Không xác định được loại dữ liệu để cập nhật');
+                    return;
+                }
+
+                const payload = {
+                    ...matchedType.buildPayload(row),
+                    priorityId: priorityId, // override lại status
+                };
+
+                if (matchedType.type === 'epic') {
+                    await apis.editEpic(row?.epicId, payload);
+                } else if (matchedType.type === 'stories') {
+                    await apis
+                        .editUserStore(row?.storyId, payload)
+                        .then((res) => {
+                            if (update.assignedTo !== null && update.assignedTo !== '') getUser(update?.assignedTo);
+                            setShowAssigneeSelect(false);
+                        })
+                        .catch((error) => {
+                            console.error('Registration error: ', error);
+                            toast.error('An error occurred during sign up. Please try again.');
+                        });
+                } else if (matchedType.type === 'bug') {
+                    await apis.editBug(row?.bugId, payload);
+                }
+                update(true);
+            } catch (error) {
+                toast.error('An error occurred during sign up. Please try again.');
+            }
+        };
+        PostData();
+        setShowDropdown(false);
     };
     const GetUserByProject = async () => {
         try {
@@ -454,7 +507,7 @@ function TableRow({ row, update }) {
                 </div>
             </td>
             <td className="w-[120px] px-4  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
-                {row.storyId || row.epicId}
+                {projectName} - {row.storyId || row.epicId}
             </td>
             <td className="px-4 w-[400px]  overflow-hidden whitespace-nowrap text-ellipsis border-b border-r border-gray-300 text-left text-gray-700">
                 <div className="">
@@ -467,7 +520,7 @@ function TableRow({ row, update }) {
                                 if (e.key === 'Enter') handleUpdateTitle();
                             }}
                             autoFocus
-                            className="mt-2 w-full text-xl  text-gray-700 border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
+                            className="mt-2 w-full text-xl  font-medium text-black border border-solid focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 border-gray-300 rounded px-2 py-1"
                         />
                     ) : (
                         <h1
@@ -475,7 +528,7 @@ function TableRow({ row, update }) {
                                 setIsEditingTitle(true);
                                 setEditedTitle(row?.name || row?.title);
                             }}
-                            className=" text-xl text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                            className=" text-xl font-medium text-black cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
                         >
                             {row?.name || row?.title}
                         </h1>
@@ -517,12 +570,13 @@ function TableRow({ row, update }) {
             </td>
             <td
                 title={row?.description || row?.comment}
-                className="px-4 max-w-[250px] overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500"
+                className="px-4 min-w-[250px] max-w-[400px] overflow-hidden whitespace-nowrap text-ellipsis h-full border-b border-r border-gray-300 text-left text-gray-500"
             >
                 {row?.description !== '' || row?.comment !== '' ? (
                     isEditingDescript ? (
-                        <input
+                        <textarea
                             value={editedDescript}
+                            rows={3}
                             onChange={(e) => setEditedDescript(e.target.value)}
                             onBlur={handleUpdateDescript}
                             onKeyDown={(e) => {
@@ -537,7 +591,7 @@ function TableRow({ row, update }) {
                                 setIsEditingDescript(true);
                                 setEditedDescript(row?.description || row?.comment);
                             }}
-                            className="text-xl text-gray-600 cursor-pointer hover:bg-neutral-200 py-2 px-1 rounded"
+                            className="text-xl text-gray-600 cursor-pointer text-ellipsis hover:bg-neutral-200 py-2 px-1 rounded"
                         >
                             {row?.description || row?.comment}
                         </h1>
@@ -564,9 +618,8 @@ function TableRow({ row, update }) {
             </td>
             <td className="px-4 w-[180px]  relative  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.assignedTo && row.assignedTo !== '' ? (
-                    <div  ref={dropdownRef} className="flex gap-3 items-center">
+                    <div ref={dropdownRef} className="flex gap-3 items-center">
                         <div
-                           
                             onClick={() => {
                                 setShowAssigneeSelect((prev) => !prev);
                             }}
@@ -633,11 +686,31 @@ function TableRow({ row, update }) {
                     </div>
                 )}
             </td>
-            <td className="px-4 w-[60px]  overflow-hidden  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
+            <td className="px-4 w-[60px]  whitespace-nowrap text-ellipsis border-b border-r border-gray-300">
                 {!!row.priorityId && (
-                    <div className="flex items-center gap-2">
-                        <span>{getPriorityIcon(priority[row.priorityId])}</span>
-                        <span>{priority[row.priorityId]}</span>
+                    <div div ref={dropdownPriority} className='relative w-full h-full'>
+                        <div
+                            onClick={handlePriorityClick}
+                            className="flex items-center gap-2 cursor-pointer"
+                        >
+                            <span>{getPriorityIcon(priority[row.priorityId])}</span>
+                            <span>{priority[row.priorityId]}</span>
+                        </div>
+
+                        {showDropdown && (
+                            <div className="absolute z-50 mt-2 right-0 w-40 bg-white border shadow-md rounded">
+                                {Object.entries(priority).map(([id, label]) => (
+                                    <div
+                                        key={id}
+                                        onClick={() => handlePrioritySelect(Number(id))}
+                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-gray-800 flex gap-2 items-center"
+                                    >
+                                        <span>{getPriorityIcon(label)}</span>
+                                        <span>{label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
             </td>

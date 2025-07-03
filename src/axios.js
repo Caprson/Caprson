@@ -6,20 +6,19 @@ const instance = axios.create({
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
     },
-    withCredentials: true, 
+    withCredentials: true,
 });
 
 // === Request Interceptor: Gửi accessToken ===
 instance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('accessToken');
-        console.log(token)
         if (token) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
         return config;
     },
-    (error) => Promise.reject(error)
+    (error) => Promise.reject(error),
 );
 
 // === Response Interceptor: Tự động refresh token nếu 401 ===
@@ -28,34 +27,42 @@ instance.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        // Nếu lỗi 401 và chưa retry
-        if ((error.response?.status === 401 || error.response?.status === 403 ) && !originalRequest._retry) {
+        if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
             originalRequest._retry = true;
-            const refreshTk =  localStorage.getItem('refreshToken');
+
+            const refreshToken = localStorage.getItem('refreshToken');
+
+            if (!refreshToken) {
+                localStorage.clear();
+                window.location.href = '/login';
+                return Promise.reject(error);
+            }
+
             try {
                 const res = await axios.post(
                     'http://localhost:8080/users/auth/refresh',
-                    {refreshToken:refreshTk},
-                    { withCredentials: true }
+                    { refreshToken },
+                    { withCredentials: true },
                 );
 
-                const newAccessToken = res.data.data.accessToken;
-                const newRefreshToken = res.data.data.refreshToken
+                const { accessToken: newAccessToken, refreshToken: newRefreshToken } = res.data.data;
+
                 localStorage.setItem('accessToken', newAccessToken);
                 localStorage.setItem('refreshToken', newRefreshToken);
-                // Gắn accessToken mới vào header rồi gửi lại request
+
                 originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
-                return instance(originalRequest);
+
+                return instance(originalRequest); // ✅ Retry với token mới
             } catch (refreshError) {
-                console.error('Refresh token failed:', refreshError);
-                localStorage.removeItem('accessToken');
-                window.location.href = '/login'; // hoặc điều hướng tuỳ app của bạn
+                console.error('Token refresh failed', refreshError);
+                localStorage.clear();
+                window.location.href = '/login';
                 return Promise.reject(refreshError);
             }
         }
 
         return Promise.reject(error);
-    }
+    },
 );
 
 export default instance;

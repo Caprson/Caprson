@@ -3,6 +3,7 @@ import classNames from 'classnames/bind';
 import { NavLink } from 'react-router-dom';
 import * as apis from '~/apis/index';
 import { toast } from 'react-toastify';
+import * as actions from "../../../store/actions"
 import { useNavigate } from 'react-router-dom';
 import styles from './Sidebar.module.scss';
 import Menu, { MenuItem } from './Menu';
@@ -19,12 +20,15 @@ import {
 } from '~/components/Icons';
 import SuggestedAccounts from '~/components/SuggestedAccounts/SuggestedAccounts';
 import * as userService from '~/services/userService';
+import routes from '~/config/routes';
+import { useDispatch } from 'react-redux';
 
 const cx = classNames.bind(styles);
 
 function Sidebar() {
     const [suggestedUsers, setSuggestedUsers] = useState([]);
     const [projects, setProjects] = useState([]);
+    const dispatch = useDispatch()
     useEffect(() => {
         userService
             .getSuggested({ page: 1, perPage: 5 })
@@ -100,15 +104,16 @@ function Sidebar() {
                 {projects.map((data, index) => (
                     <NavLink
                         key={index}
-                        to="/" // Thay đổi đường dẫn tùy ý
+                        to={`/${data.name}`} // Thay đổi đường dẫn tùy ý
                         onClick={() => {
                             window.localStorage.setItem('projectId', data.projectId)
                             window.localStorage.setItem('projectName',data.name)
+                            dispatch(actions.getprojectName(data.name))
                         }}
                         className={({ isActive }) =>
                             `flex items-center mt-1 px-2 py-1 rounded space-x-1 pb-3 font-semibold  ${
                                 isActive
-                                    ? ' text-blue-600 bg-blue-100'
+                                    ? ' text-blue-600 bg-blue-100 border-2 border-blue-400'
                                     : 'border-transparent hover:text-gray-900 hover:border-gray-300'
                             }`
                         }
@@ -128,7 +133,16 @@ function Sidebar() {
                         <span>{data.name}</span>
                     </NavLink>
                 ))}
-                <a href="/projects" class="flex items-center space-x-2 mt-1 px-2 py-1 rounded hover:bg-gray-100">
+                <NavLink
+                        to={routes.projects} // Thay đổi đường dẫn tùy ý
+                        className={({ isActive }) =>
+                            `flex items-center mt-1 px-2 py-1 rounded space-x-1 pb-3 font-semibold  ${
+                                isActive
+                                    ? ' text-blue-600 bg-blue-100 border-2 border-blue-400'
+                                    : 'border-transparent hover:text-gray-900 hover:border-gray-300'
+                            }`
+                        }
+                    >
                     <svg
                         class="w-5 h-5 text-gray-400"
                         fill="none"
@@ -141,7 +155,7 @@ function Sidebar() {
                         <path d="M4 6h16M4 12h16M4 18h16" />
                     </svg>
                     <span>View all projects</span>
-                </a>
+                </NavLink>
 
                 <a href="#" class="flex items-center space-x-2 mt-1 px-2 py-1 rounded hover:bg-gray-100">
                     <svg

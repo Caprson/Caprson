@@ -389,7 +389,8 @@ function RightPanel({ item, update }) {
         return colors[index];
     }
     return (
-        <div class="flex flex-col w-2/5 border-l border-gray-200 overflow-y-auto p-6 space-y-6">
+        <div className='w-3/5  overflow-hidden  h-5/6 '>
+            <div class="flex flex-col flex-1 w-full h-full border-l border-gray-200 overflow-y-auto p-6 space-y-6">
             <div class="flex justify-between">
                 <div className="flex items-center space-x-2 text-gray-700 text-xl font-normal">
                     <button class="flex items-center space-x-1 hover:text-blue-600">
@@ -505,10 +506,10 @@ function RightPanel({ item, update }) {
                 )}
             </div>
             {subTask.length > 0 && (
-                <div className="border border-gray-200 rounded-xl overflow-x-hidden overflow-y-hidden">
-                    <div className="overflow-x-auto overflow-y-auto max-h-[200px] shadow">
+                <div className="border border-gray-200 min-h-[150px] rounded-xl overflow-x-hidden overflow-y-hidden">
+                    <div className="overflow-x-auto overflow-y-auto  max-h-full shadow">
                         <table className="border-collapse">
-                            <thead className="sticky top-0 z-20">
+                            <thead className="sticky top-0 bg-neutral-100  z-20">
                                 <tr>
                                     <th className="p-3 border-b border-r border-gray-300 text-sm text-center">Type</th>
                                     <th className="p-3 border-b border-r border-gray-300 text-sm text-left">Key</th>
@@ -622,7 +623,7 @@ function RightPanel({ item, update }) {
                                                     </div>
                                                 )}
                                                 {showAssigneeIndex === index && (
-                                                    <div className="absolute top-10 right-0 z-50 w-72 py-2 bg-white shadow-md border rounded text-sm">
+                                                    <div className="absolute top-10 right-0 z-10 w-72 py-2 bg-white shadow-md border rounded text-sm">
                                                         <div
                                                             onClick={() => handleUserSelect(null, data)}
                                                             className="hover:bg-gray-100 flex items-center gap-2 px-4 py-2 cursor-pointer"
@@ -766,6 +767,7 @@ function RightPanel({ item, update }) {
                     </div>
                 </div>
             </section>
+        </div>
         </div>
     );
 }

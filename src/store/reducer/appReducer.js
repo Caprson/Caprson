@@ -4,7 +4,8 @@ const initState = {
     check_login: false,
     isShowPopup: false,
     isShowAddpeople: false,
-    isShowRightPanel:false
+    isShowRightPanel:false,
+    projectName:'',
 };
 
 const appReducer = (state = initState, action) => {
@@ -28,6 +29,11 @@ const appReducer = (state = initState, action) => {
             return {
                 ...state,
                 isShowRightPanel: action.isShow,
+            };
+        case actionType.GET_PROJECTNAME:
+            return {
+                ...state,
+                projectName: action.isShow,
             };
 
         default:

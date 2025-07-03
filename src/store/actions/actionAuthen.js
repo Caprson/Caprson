@@ -24,3 +24,9 @@ export const IsShowRightPanel = (bool) =>{
         isShow: bool 
     }
 }
+export const getprojectName = (bool) =>{
+    return {
+        type:actionType.GET_PROJECTNAME,
+        isShow: bool 
+    }
+}

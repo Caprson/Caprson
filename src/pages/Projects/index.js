@@ -3,10 +3,13 @@ import * as apis from '~/apis/index';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import routes from '~/config/routes';
+import { useDispatch } from 'react-redux';
+import * as actions from "../../store/actions"
 
 function Projects() {
     const navigate = useNavigate();
-
+    const dispatch = useDispatch()
     const [project, setProject] = useState([]);
 
     useEffect(() => {
@@ -47,9 +50,9 @@ function Projects() {
     const SelectProject = (proId,proName) => {
         navigate('/blacklog');
         if (proId !== null) {
-            console.log(proId);
             localStorage.setItem('projectId', proId);
             localStorage.setItem('projectName',proName)
+            dispatch(actions.getprojectName(proName))
         }
     };
     const [userMap, setUserMap] = useState({});
@@ -106,7 +109,7 @@ function Projects() {
                         <button
                             class="bg-blue-600 hover:bg-blue-700 text-white text-xl font-medium px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
                             type="button"
-                            onClick={() => navigate('/createProject')}
+                            onClick={() => navigate(routes.createProject)}
                         >
                             Create project
                         </button>
@@ -152,9 +155,7 @@ function Projects() {
                                     Name
                                     <i class="fas fa-sort-down ml-1 text-gray-400"></i>
                                 </th>
-                                <th class="px-3 py-2 text-left text-gray-700 font-semibold" scope="col">
-                                    Key
-                                </th>
+                             
                                 <th class="px-3 py-2 text-left text-gray-700 font-semibold" scope="col">
                                     Type
                                 </th>
@@ -187,7 +188,7 @@ function Projects() {
                                             {pj.name}
                                         </a>
                                     </td>
-                                    <td class="px-3 py-2 text-gray-900 font-normal">{}</td>
+                                   
                                     <td class="px-3 py-2 text-gray-900 font-normal">{formatDate(pj?.createdAt)}</td>
                                     <td class="px-3 py-2 flex items-center space-x-2 text-gray-900 font-normal">
                                         <div

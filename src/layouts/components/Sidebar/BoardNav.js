@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Addpleople from '~/pages/Projects/Addpleople';
 import * as actions from '../../../store/actions';
 import { NavLink } from 'react-router-dom';
+import routes from '~/config/routes';
 
 function BoardNav() {
     const { isShowAddpeople } = useSelector((state) => state.app);
@@ -12,7 +13,7 @@ function BoardNav() {
     return (
         <nav class="flex space-x-6 border-b border-gray-200 px-6 text-xl font-semibold text-gray-600 select-none overflow-x-auto">
             <NavLink
-                to="/blacklog"
+                to={routes.backlog}
                 className={({ isActive }) =>
                     `flex items-center space-x-1 pb-3 border-b-2 ${
                         isActive
@@ -36,7 +37,7 @@ function BoardNav() {
             </NavLink>
 
             <NavLink
-                to="/"
+                to={routes.activesprint}
                 className={({ isActive }) =>
                     `flex items-center space-x-1 pb-3 border-b-2 ${
                         isActive
@@ -60,7 +61,7 @@ function BoardNav() {
             </NavLink>
 
             <NavLink
-                to="/listwork"
+                to={routes.listwork}
                 className={({ isActive }) =>
                     `flex items-center space-x-1 pb-3 border-b-2 ${
                         isActive

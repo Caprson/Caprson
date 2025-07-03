@@ -3,8 +3,12 @@ import { Fragment } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicRoutes } from '~/routes';
 import DefaultLayout from '~/layouts';
+import routes from './config/routes';
+import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 function App() {
+    const {projectName} = useSelector((state) => state.app)
     return (
         <Router>
             <div className="App">
@@ -31,6 +35,17 @@ function App() {
                             />
                         );
                     })}
+
+                    <Route
+                        path="*"
+                        element={
+                            projectName !== null ? (
+                                <Navigate to={routes.activesprint} replace />
+                            ) : (
+                                <Navigate to={routes.login} replace />
+                            )
+                        }
+                    />
                 </Routes>
             </div>
         </Router>

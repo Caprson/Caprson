@@ -1,15 +1,16 @@
+const projectName = localStorage.getItem("projectName")
 const routes = {
-    home: '/',
+    home: `/${projectName}`,
     following: '/following',
-    profile: '/:nickname',
     upload: '/upload',
     search: '/search',
     live: '/live',
-    backlog:'/blacklog',
-    listwork:'/listwork',
+    backlog:`/${projectName}/blacklog`,
+    listwork:`/${projectName}/listwork`,
+    activesprint:`/${projectName}/active_sprint`,
     signup: '/signup',
     projects: '/projects',
-    createProject:'/createProject',
+    createProject:'/projects/createProject',
     login: '/login'
 };
 

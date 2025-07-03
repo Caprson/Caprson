@@ -3,7 +3,7 @@ import * as apis from '../../apis';
 import { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 
-export function Task({ task, onClick }) {
+export function Task({ task, onClick, isUpdate, setIsUpdate, updatedTask, setUpdatedTask }) {
     const id = task.type === 'bug' ? `bug-${task.bugId}` : `story-${task.storyId}`;
     const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
 
@@ -27,21 +27,13 @@ export function Task({ task, onClick }) {
         if (task.assignedTo != null) GetUser(task.assignedTo);
     }, [task.assignedTo]);
 
-    function getInitials(name = '') {
-        if (!name) return '';
-        const words = name.trim().split(' ');
-        return words.length === 1
-            ? words[0][0].toUpperCase()
-            : words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
-    }
+     const handleMouseUp = () => {
+    if (!mouseMovedRef.current) onClick(task);
+  };
 
-    function getColorFromName(name = '') {
-        const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
-        const index = name ? name.charCodeAt(0) % colors.length : 0;
-        return colors[index];
-    }
     const isDraggingRef = useRef(false);
     const mouseMovedRef = useRef(false);
+
     useEffect(() => {
         const handleMouseMove = () => {
             mouseMovedRef.current = true;
@@ -52,7 +44,6 @@ export function Task({ task, onClick }) {
             window.removeEventListener('mouseup', handleMouseUp);
 
             if (!mouseMovedRef.current) {
-                console.log('jsdbasd');
                 onClick(task);
             }
 
@@ -91,7 +82,7 @@ export function Task({ task, onClick }) {
             <div
                 {...listeners}
                 ref={containerRef}
-                className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer "
+                className="absolute top-0 bottom-0 left-0 right-0 cursor-pointer"
             ></div>
             <div className="flex flex-col gap-3 w-full">
                 <div className="py-2">
@@ -124,4 +115,18 @@ export function Task({ task, onClick }) {
             </div>
         </div>
     );
+}
+
+function getInitials(name = '') {
+    if (!name) return '';
+    const words = name.trim().split(' ');
+    return words.length === 1
+        ? words[0][0].toUpperCase()
+        : words[0][0].toUpperCase() + words[words.length - 1][0].toUpperCase();
+}
+
+function getColorFromName(name = '') {
+    const colors = ['bg-red-500', 'bg-green-500', 'bg-yellow-500', 'bg-blue-500', 'bg-purple-500'];
+    const index = name ? name.charCodeAt(0) % colors.length : 0;
+    return colors[index];
 }
